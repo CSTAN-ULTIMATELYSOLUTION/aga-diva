@@ -452,6 +452,30 @@ function App() {
 }
 
 function VseWebsite() {
+  const [openIndex, setOpenIndex] = useState<number | null>(0);
+  const indexItems = [
+    {
+      title: "Scalp therapy",
+      detail:
+        "A root-first cleansing ritual for comfort, balance, and a calmer scalp environment before styling begins.",
+    },
+    {
+      title: "Plant-based",
+      detail:
+        "Powered by plant-derived surfactants and botanical conditioning support for a premium daily wash feel.",
+    },
+    {
+      title: "Salon ritual",
+      detail:
+        "Designed for a slow double-cleanse at the basin: massage, breathe, rinse, repeat with intention.",
+    },
+    {
+      title: "Root strength",
+      detail:
+        "Supports the foundation of healthy-looking hair by keeping roots fresh, light, and resilient.",
+    },
+  ];
+
   return (
     <main className="vseSite">
       <header className="vseHeader">
@@ -519,15 +543,45 @@ function VseWebsite() {
         </div>
       </section>
 
-      <section className="vseIndex">
-        {["Scalp therapy", "Plant-based", "Salon ritual", "Root strength"].map(
-          (item, index) => (
-            <div key={item}>
-              <span>{String(index + 1).padStart(2, "0")}</span>
-              <strong>{item}</strong>
+      <section className="vseIndex" aria-label="Root Force details">
+        {indexItems.map((item, index) => {
+          const isOpen = openIndex === index;
+          return (
+            <div className={isOpen ? "open" : ""} key={item.title}>
+              <button
+                type="button"
+                aria-expanded={isOpen}
+                onClick={() => setOpenIndex(isOpen ? null : index)}
+              >
+                <span>{String(index + 1).padStart(2, "0")}</span>
+                <strong>{item.title}</strong>
+                <em>{isOpen ? "Close" : "Open"}</em>
+              </button>
+              {isOpen && <p>{item.detail}</p>}
             </div>
-          ),
-        )}
+          );
+        })}
+      </section>
+
+      <section className="vseBuying" aria-label="Buying method">
+        <div>
+          <p>Buying method</p>
+          <h2>Order through VSÉ consultation.</h2>
+        </div>
+        <ol>
+          <li>
+            <span>01</span>
+            Message VSÉ to confirm scalp concern and bottle size.
+          </li>
+          <li>
+            <span>02</span>
+            Receive price confirmation: RM138-168.
+          </li>
+          <li>
+            <span>03</span>
+            Pay by transfer or e-wallet, then arrange pickup or delivery.
+          </li>
+        </ol>
       </section>
 
       <footer className="vseFooter">

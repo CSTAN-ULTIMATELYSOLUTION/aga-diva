@@ -817,8 +817,7 @@ h1 em {
   border-top: 1px solid #15130f;
 }
 
-.vseCopy div,
-.vseIndex div {
+.vseCopy div {
   display: grid;
   grid-template-columns: 92px 1fr;
   gap: 18px;
@@ -827,7 +826,8 @@ h1 em {
 }
 
 .vseCopy dt,
-.vseIndex span {
+.vseIndex span,
+.vseBuying span {
   color: #665f51;
   font-size: 11px;
   letter-spacing: 0.1em;
@@ -843,11 +843,88 @@ h1 em {
   padding: 0 16px 92px;
 }
 
+.vseIndex div {
+  border-bottom: 1px solid #15130f;
+}
+
+.vseIndex button {
+  display: grid;
+  grid-template-columns: 62px 1fr auto;
+  gap: 18px;
+  width: 100%;
+  min-height: auto;
+  border: 0;
+  border-radius: 0;
+  padding: 15px 0;
+  color: #0b0b09;
+  background: transparent;
+  text-align: left;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
 .vseIndex strong {
   font-family: "Cormorant Garamond", serif;
   font-size: clamp(30px, 6vw, 76px);
   font-weight: 300;
   line-height: 0.98;
+}
+
+.vseIndex em {
+  align-self: center;
+  color: #665f51;
+  font-size: 11px;
+  font-style: normal;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.vseIndex p {
+  width: min(680px, 100%);
+  margin: 0 0 24px;
+  padding-left: 80px;
+  color: #494238;
+  font-size: 15px;
+  line-height: 1.65;
+}
+
+.vseBuying {
+  display: grid;
+  gap: 38px;
+  padding: 0 16px 90px;
+}
+
+.vseBuying p {
+  margin: 0 0 10px;
+  color: #494238;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.vseBuying h2 {
+  margin: 0;
+  font-family: "Cormorant Garamond", serif;
+  font-size: clamp(44px, 8vw, 106px);
+  font-weight: 300;
+  line-height: 0.96;
+}
+
+.vseBuying ol {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid #15130f;
+}
+
+.vseBuying li {
+  display: grid;
+  grid-template-columns: 62px 1fr;
+  gap: 18px;
+  padding: 18px 0;
+  border-bottom: 1px solid #15130f;
+  line-height: 1.5;
 }
 
 .vseFooter {
@@ -909,8 +986,19 @@ h1 em {
     padding: 0 24px 132px;
   }
 
-  .vseIndex div {
-    grid-template-columns: 11vw 1fr;
+  .vseIndex button {
+    grid-template-columns: 11vw 1fr auto;
+  }
+
+  .vseIndex p {
+    margin-left: 11vw;
+    padding-left: 18px;
+  }
+
+  .vseBuying {
+    grid-template-columns: minmax(0, 7fr) minmax(320px, 4fr);
+    gap: 8.333vw;
+    padding: 0 24px 132px;
   }
 
   .vseFooter {
