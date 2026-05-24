@@ -1655,6 +1655,19 @@ button:disabled {
   border-radius: 10px;
   font-weight: 400;
   line-height: 1.5;
+  white-space: pre-line;
+}
+
+.message.hint {
+  display: grid;
+  gap: 6px;
+  color: var(--text);
+  background: rgba(201, 169, 110, 0.08);
+  border: 1px solid rgba(201, 169, 110, 0.22);
+}
+
+.message.hint strong {
+  color: var(--gold-light);
 }
 
 .message.saved {

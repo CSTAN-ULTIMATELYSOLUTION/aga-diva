@@ -711,25 +711,28 @@ function CultureAgreementForm() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  const isReady = useMemo(
-    () =>
-      Boolean(
-        form.nameCN &&
-          form.nameEN &&
-          form.icNumber &&
-          form.dob &&
-          form.email &&
-          form.phone &&
-          form.emergencyName &&
-          form.emergencyPhone &&
-          form.technicalLevel &&
-          form.finalAgreement &&
-          form.finalName &&
-          form.dateSigned &&
-          form.startDate,
-      ),
-    [form],
-  );
+  const missingRequiredFields = useMemo(() => {
+    const required = [
+      { section: "个人资料 / Personal", label: "1. 中文姓名 / Chinese Name", missing: !form.nameCN.trim() },
+      { section: "个人资料 / Personal", label: "2. 英文姓名 / English Name", missing: !form.nameEN.trim() },
+      { section: "个人资料 / Personal", label: "5. 身份证号码 / IC Number", missing: !form.icNumber.trim() },
+      { section: "个人资料 / Personal", label: "6. 出生日期 / Date of Birth", missing: !form.dob },
+      { section: "个人资料 / Personal", label: "7. 电话号码 / Phone", missing: !form.phone.trim() },
+      { section: "个人资料 / Personal", label: "8. Email", missing: !form.email.trim() },
+      { section: "个人资料 / Personal", label: "16. 紧急联系人姓名 / Emergency Contact Name", missing: !form.emergencyName.trim() },
+      { section: "个人资料 / Personal", label: "18. 紧急联系电话 / Emergency Phone", missing: !form.emergencyPhone.trim() },
+      { section: "技术能力 / Technical", label: "29. 整体技术程度 / Overall Technical Level", missing: !form.technicalLevel },
+      { section: "最终确认 / Final", label: "61. 我同意以上内容 / I agree to the above content", missing: !form.finalAgreement },
+      { section: "最终确认 / Final", label: "63. 姓名 / Final Name", missing: !form.finalName.trim() },
+      { section: "最终确认 / Final", label: "64. 签名 / Signature", missing: !signature },
+      { section: "最终确认 / Final", label: "65. 签署日期 / Date Signed", missing: !form.dateSigned },
+      { section: "最终确认 / Final", label: "66. 入职日期 / Start Date", missing: !form.startDate },
+    ];
+
+    return required.filter((item) => item.missing);
+  }, [form, signature]);
+
+  const isReady = missingRequiredFields.length === 0;
 
   const update = (name: keyof FormData, value: FormValue) => {
     setForm((current) => ({ ...current, [name]: value }));
@@ -848,14 +851,25 @@ function CultureAgreementForm() {
 
   const submit = async (event: React.FormEvent) => {
     event.preventDefault();
-    setStatus("saving");
     setMessage("");
+
+    if (!isReady) {
+      setStatus("error");
+      setMessage(
+        `请完成以下必填项目 / Please complete these required fields:\n${missingRequiredFields
+          .map((field) => `- ${field.section}: ${field.label}`)
+          .join("\n")}`,
+      );
+      return;
+    }
 
     if (!supabase) {
       setStatus("error");
       setMessage("请先加入 Supabase URL 与 anon key / Add Supabase URL and anon key to .env before submitting.");
       return;
     }
+
+    setStatus("saving");
 
     const { error } = await supabase.from(tableName).insert(payload());
 
@@ -913,7 +927,7 @@ function CultureAgreementForm() {
       </nav>
 
       <div className="shell">
-        <form className="form" onSubmit={submit}>
+        <form className="form" onSubmit={submit} noValidate>
           {sections.map((section) => (
             <Section {...section} key={section.id}>
               {section.id === "final" && (
@@ -961,7 +975,7 @@ function CultureAgreementForm() {
           ))}
 
           <div className="actions">
-            <button type="submit" disabled={!isReady || status === "saving"}>
+            <button type="submit" disabled={status === "saving"}>
               {status === "saving" ? (
                 <LoaderCircle size={18} className="spin" />
               ) : status === "saved" ? (
@@ -972,6 +986,18 @@ function CultureAgreementForm() {
               提交 / Submit
             </button>
           </div>
+
+          {!isReady && (
+            <div className="message hint">
+              <strong>尚未完成 / Not ready yet</strong>
+              <span>
+                还差 {missingRequiredFields.length} 个必填项目。点击 Submit 会显示完整清单。
+                {" "}
+                {missingRequiredFields.length} required item
+                {missingRequiredFields.length === 1 ? "" : "s"} remaining.
+              </span>
+            </div>
+          )}
 
           {message && <p className={`message ${status}`}>{message}</p>}
         </form>
