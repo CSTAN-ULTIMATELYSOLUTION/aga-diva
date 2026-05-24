@@ -551,6 +551,11 @@ h1 em {
   background: #200c0c;
 }
 
+.emptyRoot {
+  min-height: 100vh;
+  background: #000;
+}
+
 .sectionNav {
   position: sticky;
   top: 0;

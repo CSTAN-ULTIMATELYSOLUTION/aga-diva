@@ -439,7 +439,11 @@ function App() {
     return <AdminPortal />;
   }
 
-  return <CultureAgreementForm />;
+  if (route === formPath) {
+    return <CultureAgreementForm />;
+  }
+
+  return <main className="emptyRoot" aria-label="Empty home page" />;
 }
 
 function CultureAgreementForm() {
