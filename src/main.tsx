@@ -444,7 +444,98 @@ function App() {
     return <CultureAgreementForm />;
   }
 
-  return <main className="emptyRoot" aria-label="Empty home page" />;
+  if (route === "/") {
+    return <VseWebsite />;
+  }
+
+  return <main className="emptyRoot" aria-label="Empty page" />;
+}
+
+function VseWebsite() {
+  return (
+    <main className="vseSite">
+      <header className="vseHeader">
+        <a href="/" aria-label="VSÉ home">VSÉ</a>
+        <nav aria-label="Website navigation">
+          <a href="#therapy">Therapy</a>
+          <a href="#root-force">Root Force</a>
+          <a href="/form/culture-agreement">HR</a>
+        </nav>
+      </header>
+
+      <section className="vseHero">
+        <div className="vseHeroText">
+          <p>Premium plant-based scalp therapy haircare</p>
+          <h1>
+            Root
+            <br />
+            Force
+            <br />
+            Shampoo
+          </h1>
+        </div>
+        <figure className="vseHeroImage">
+          <img src="/assets/vse-root-force.svg" alt="VSÉ Root Force Shampoo bottle" />
+          <figcaption>01 / Product study · RM138-168</figcaption>
+        </figure>
+      </section>
+
+      <section className="vseStatement" id="therapy">
+        <p>
+          VSÉ treats the scalp as living terrain: calm the root, restore the
+          balance, and let healthy hair begin where it should.
+        </p>
+      </section>
+
+      <section className="vseFullBleed" aria-label="Botanical scalp therapy visual">
+        <img src="/assets/vse-botanical-field.svg" alt="Botanical field texture for scalp therapy" />
+      </section>
+
+      <section className="vseProductGrid" id="root-force">
+        <div>
+          <p>Root Force Shampoo</p>
+          <h2>Plant-based cleanse for scalp strength.</h2>
+        </div>
+        <div className="vseCopy">
+          <p>
+            A premium wash ritual designed for roots that need clarity, comfort,
+            and daily resilience. Botanical actives meet a salon-minded finish:
+            clean, quiet, and exacting.
+          </p>
+          <dl>
+            <div>
+              <dt>Price</dt>
+              <dd>RM138-168</dd>
+            </div>
+            <div>
+              <dt>Focus</dt>
+              <dd>Scalp balance · Root vitality · Gentle cleanse</dd>
+            </div>
+            <div>
+              <dt>Base</dt>
+              <dd>Plant-derived therapy system</dd>
+            </div>
+          </dl>
+        </div>
+      </section>
+
+      <section className="vseIndex">
+        {["Scalp therapy", "Plant-based", "Salon ritual", "Root strength"].map(
+          (item, index) => (
+            <div key={item}>
+              <span>{String(index + 1).padStart(2, "0")}</span>
+              <strong>{item}</strong>
+            </div>
+          ),
+        )}
+      </section>
+
+      <footer className="vseFooter">
+        <span>VSÉ</span>
+        <a href="/admin">Admin</a>
+      </footer>
+    </main>
+  );
 }
 
 function CultureAgreementForm() {

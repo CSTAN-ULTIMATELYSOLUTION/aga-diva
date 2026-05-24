@@ -1,0 +1,18 @@
+<svg width="900" height="1200" viewBox="0 0 900 1200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="900" height="1200" fill="#F6F1E8"/>
+  <ellipse cx="450" cy="1098" rx="214" ry="34" fill="#15130F" fill-opacity=".16"/>
+  <path d="M342 166h216l20 104H322l20-104Z" fill="#12110E"/>
+  <path d="M364 258h172c54 0 98 44 98 98v610c0 54-44 98-98 98H364c-54 0-98-44-98-98V356c0-54 44-98 98-98Z" fill="#0D0D0B"/>
+  <path d="M331 334h238c20 0 36 16 36 36v528c0 20-16 36-36 36H331c-20 0-36-16-36-36V370c0-20 16-36 36-36Z" fill="#EAE1D2"/>
+  <path d="M354 366h192c14 0 26 12 26 26v484c0 14-12 26-26 26H354c-14 0-26-12-26-26V392c0-14 12-26 26-26Z" stroke="#15130F" stroke-width="2"/>
+  <text x="450" y="444" text-anchor="middle" fill="#15130F" font-family="Georgia, serif" font-size="84" letter-spacing="-2">VSÉ</text>
+  <text x="450" y="502" text-anchor="middle" fill="#15130F" font-family="Helvetica, Arial, sans-serif" font-size="20" letter-spacing="7">ROOT FORCE</text>
+  <line x1="376" y1="540" x2="524" y2="540" stroke="#15130F" stroke-width="2"/>
+  <text x="450" y="612" text-anchor="middle" fill="#15130F" font-family="Helvetica, Arial, sans-serif" font-size="34" letter-spacing="2">SHAMPOO</text>
+  <text x="450" y="675" text-anchor="middle" fill="#15130F" font-family="Helvetica, Arial, sans-serif" font-size="21" letter-spacing="4">PLANT-BASED</text>
+  <text x="450" y="706" text-anchor="middle" fill="#15130F" font-family="Helvetica, Arial, sans-serif" font-size="21" letter-spacing="4">SCALP THERAPY</text>
+  <path d="M451 763c-38-58-24-114 0-154 24 40 38 96 0 154Z" stroke="#15130F" stroke-width="3"/>
+  <path d="M450 763c-44-42-99-50-148-35 34 38 88 61 148 35Z" stroke="#15130F" stroke-width="3"/>
+  <path d="M450 763c44-42 99-50 148-35-34 38-88 61-148 35Z" stroke="#15130F" stroke-width="3"/>
+  <text x="450" y="832" text-anchor="middle" fill="#15130F" font-family="Helvetica, Arial, sans-serif" font-size="18" letter-spacing="5">RM138 - RM168</text>
+</svg>

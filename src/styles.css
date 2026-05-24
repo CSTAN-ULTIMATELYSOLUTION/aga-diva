@@ -658,6 +658,210 @@ h1 em {
   background: #000;
 }
 
+.vseSite {
+  min-height: 100vh;
+  background: #f7f3eb;
+  color: #0b0b09;
+  font-family: "Outfit", ui-sans-serif, system-ui, sans-serif;
+}
+
+.vseSite a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.vseHeader {
+  position: fixed;
+  inset: 0 0 auto;
+  z-index: 20;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  padding: 14px 16px;
+  mix-blend-mode: difference;
+  color: #fff;
+}
+
+.vseHeader > a {
+  font-family: "Cormorant Garamond", serif;
+  font-size: 28px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+.vseHeader nav {
+  display: flex;
+  gap: 14px;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.vseHero {
+  display: grid;
+  min-height: 100svh;
+  background: #f7f3eb;
+}
+
+.vseHeroText {
+  display: grid;
+  align-content: center;
+  min-height: 54svh;
+  padding: 82px 16px 28px;
+  text-align: center;
+}
+
+.vseHeroText p,
+.vseProductGrid > div > p,
+.vseFooter,
+.vseHeroImage figcaption {
+  color: #494238;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.vseHeroText h1 {
+  margin: 0;
+  color: #0b0b09;
+  font-family: "Cormorant Garamond", serif;
+  font-size: clamp(72px, 22vw, 240px);
+  font-weight: 300;
+  letter-spacing: 0;
+  line-height: 0.78;
+  text-transform: uppercase;
+}
+
+.vseHeroImage {
+  position: relative;
+  display: grid;
+  min-height: 46svh;
+  margin: 0;
+  place-items: center;
+  overflow: hidden;
+  background: #0b0b09;
+}
+
+.vseHeroImage img {
+  width: min(72vw, 520px);
+  max-height: 78svh;
+  object-fit: contain;
+}
+
+.vseHeroImage figcaption {
+  position: absolute;
+  right: 14px;
+  bottom: 12px;
+  color: #f7f3eb;
+}
+
+.vseStatement {
+  display: grid;
+  min-height: 76svh;
+  padding: 80px 16px;
+  place-items: center;
+  text-align: center;
+}
+
+.vseStatement p {
+  width: min(1060px, 100%);
+  margin: 0;
+  font-family: "Cormorant Garamond", serif;
+  font-size: clamp(44px, 9vw, 126px);
+  font-weight: 300;
+  line-height: 0.98;
+}
+
+.vseFullBleed {
+  margin: 0;
+  background: #0b0b09;
+}
+
+.vseFullBleed img {
+  display: block;
+  width: 100%;
+  min-height: 78svh;
+  object-fit: cover;
+}
+
+.vseProductGrid {
+  display: grid;
+  gap: 38px;
+  padding: 76px 16px;
+}
+
+.vseProductGrid h2 {
+  margin: 0;
+  font-family: "Cormorant Garamond", serif;
+  font-size: clamp(46px, 8vw, 118px);
+  font-weight: 300;
+  line-height: 0.96;
+}
+
+.vseCopy {
+  display: grid;
+  gap: 34px;
+  align-content: end;
+  font-size: 16px;
+  line-height: 1.55;
+}
+
+.vseCopy p {
+  margin: 0;
+}
+
+.vseCopy dl {
+  display: grid;
+  gap: 0;
+  margin: 0;
+  border-top: 1px solid #15130f;
+}
+
+.vseCopy div,
+.vseIndex div {
+  display: grid;
+  grid-template-columns: 92px 1fr;
+  gap: 18px;
+  padding: 15px 0;
+  border-bottom: 1px solid #15130f;
+}
+
+.vseCopy dt,
+.vseIndex span {
+  color: #665f51;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.vseCopy dd {
+  margin: 0;
+}
+
+.vseIndex {
+  display: grid;
+  padding: 0 16px 92px;
+}
+
+.vseIndex strong {
+  font-family: "Cormorant Garamond", serif;
+  font-size: clamp(30px, 6vw, 76px);
+  font-weight: 300;
+  line-height: 0.98;
+}
+
+.vseFooter {
+  display: flex;
+  justify-content: space-between;
+  padding: 16px;
+  border-top: 1px solid #15130f;
+}
+
+.vseFooter span {
+  font-family: "Cormorant Garamond", serif;
+  font-size: 22px;
+}
+
 @media (min-width: 900px) {
   .adminShell {
     grid-template-columns: 220px minmax(0, 1fr);
@@ -668,6 +872,49 @@ h1 em {
     position: sticky;
     top: 18px;
     grid-template-columns: 1fr;
+  }
+
+  .vseHeader {
+    padding: 18px 42px 18px 24px;
+  }
+
+  .vseHeader nav {
+    gap: 28px;
+  }
+
+  .vseHero {
+    grid-template-columns: 1.05fr 0.95fr;
+  }
+
+  .vseHeroText,
+  .vseHeroImage {
+    min-height: 100svh;
+  }
+
+  .vseHeroText {
+    padding: 90px 28px 40px;
+  }
+
+  .vseHeroText h1 {
+    font-size: clamp(86px, 10.5vw, 162px);
+  }
+
+  .vseProductGrid {
+    grid-template-columns: minmax(0, 7fr) minmax(320px, 4fr);
+    gap: 8.333vw;
+    padding: 130px 24px;
+  }
+
+  .vseIndex {
+    padding: 0 24px 132px;
+  }
+
+  .vseIndex div {
+    grid-template-columns: 11vw 1fr;
+  }
+
+  .vseFooter {
+    padding: 18px 24px;
   }
 }
 
