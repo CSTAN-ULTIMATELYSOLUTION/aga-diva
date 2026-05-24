@@ -505,7 +505,9 @@ function VseWebsite() {
   return (
     <main className="vseSite">
       <header className="vseHeader">
-        <a href="/" aria-label="VSÉ home">VSÉ</a>
+        <a href="/" aria-label="VSÉ home">
+          <img src="/assets/vse-final-extracted/vse-final-01.png" alt="VSÉ" />
+        </a>
         <nav aria-label="Website navigation">
           <a href="#therapy">Therapy</a>
           <a href="#ritual">Ritual</a>
@@ -527,7 +529,7 @@ function VseWebsite() {
           </h1>
         </div>
         <figure className="vseHeroImage">
-          <img src="/assets/vse-root-force.svg" alt="VSÉ Root Force Shampoo bottle" />
+          <img src="/assets/vse-final-extracted/vse-final-07.jpg" alt="VSÉ Root Force Shampoo bottle" />
           <figcaption>01 / Product study · RM138-168</figcaption>
         </figure>
       </section>
@@ -561,7 +563,7 @@ function VseWebsite() {
       </section>
 
       <section className="vseFullBleed" aria-label="05 Botanical scalp therapy visual">
-        <img src="/assets/vse-botanical-field.svg" alt="Botanical field texture for scalp therapy" />
+        <img src="/assets/vse-final-extracted/vse-final-05.jpg" alt="Botanical actives in water for scalp therapy" />
       </section>
 
       <section className="vseProductGrid" id="root-force" aria-label="06 Product details">
@@ -636,6 +638,11 @@ function VseWebsite() {
             <li key={item}>{item}</li>
           ))}
         </ul>
+        <div className="vseStandardsMedia" aria-label="Botanical ingredient study">
+          <img src="/assets/vse-final-extracted/vse-final-04.jpg" alt="Purple botanical ingredient with water droplets" />
+          <img src="/assets/vse-final-extracted/vse-final-10.jpg" alt="Lime botanical extract with water" />
+          <img src="/assets/vse-final-extracted/vse-final-08.jpg" alt="Plant bud with water droplets" />
+        </div>
       </section>
 
       <section className="vseBuying" id="buying" aria-label="10 Buying method">

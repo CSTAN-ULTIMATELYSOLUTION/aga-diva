@@ -683,10 +683,21 @@ h1 em {
 }
 
 .vseHeader > a {
+  display: inline-flex;
+  align-items: center;
+  width: 54px;
+  height: 34px;
   font-family: "Cormorant Garamond", serif;
   font-size: 28px;
   font-weight: 600;
   letter-spacing: 0.04em;
+}
+
+.vseHeader > a img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 
 .vseHeader nav {
@@ -750,9 +761,10 @@ h1 em {
 }
 
 .vseHeroImage img {
-  width: min(72vw, 520px);
-  max-height: 78svh;
-  object-fit: contain;
+  width: 100%;
+  height: 100%;
+  min-height: 46svh;
+  object-fit: cover;
 }
 
 .vseHeroImage figcaption {
@@ -871,6 +883,7 @@ h1 em {
   width: 100%;
   min-height: 78svh;
   object-fit: cover;
+  object-position: center;
 }
 
 .vseProductGrid {
@@ -1047,6 +1060,20 @@ h1 em {
   color: #ded7c9;
 }
 
+.vseStandardsMedia {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.vseStandardsMedia img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+  filter: saturate(0.9);
+}
+
 .vseBuying {
   display: grid;
   gap: 38px;
@@ -1207,10 +1234,16 @@ h1 em {
   }
 
   .vseStandards {
-    grid-template-columns: minmax(170px, 2fr) minmax(0, 6fr) minmax(320px, 4fr);
+    grid-template-columns: minmax(170px, 2fr) minmax(0, 5fr) minmax(320px, 5fr);
     align-items: start;
     gap: 5vw;
     padding: 132px 24px;
+  }
+
+  .vseStandardsMedia {
+    grid-template-columns: repeat(3, 1fr);
+    align-self: end;
+    grid-column: 1 / -1;
   }
 
   .vseBuying {
