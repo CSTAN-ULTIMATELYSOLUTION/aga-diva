@@ -39,12 +39,29 @@ alter table miniapp.diva_onboarding_submissions enable row level security;
 grant usage on schema miniapp to anon;
 grant usage on schema miniapp to authenticated;
 grant insert on miniapp.diva_onboarding_submissions to anon;
+grant insert on miniapp.diva_onboarding_submissions to authenticated;
 grant select on miniapp.diva_onboarding_submissions to authenticated;
 
 create policy "Allow valid public Diva onboarding submissions"
   on miniapp.diva_onboarding_submissions
   for insert
   to anon
+  with check (
+    length(trim(employee_name)) > 0
+    and position('@' in email) > 1
+    and length(trim(phone)) > 0
+    and length(trim(emergency_contact_name)) > 0
+    and length(trim(emergency_contact_phone)) > 0
+    and length(trim(role_applied_for)) > 0
+    and length(trim(employment_type)) > 0
+    and policies_acknowledged is true
+    and jsonb_typeof(form_payload) = 'object'
+  );
+
+create policy "Allow valid authenticated Diva onboarding submissions"
+  on miniapp.diva_onboarding_submissions
+  for insert
+  to authenticated
   with check (
     length(trim(employee_name)) > 0
     and position('@' in email) > 1
