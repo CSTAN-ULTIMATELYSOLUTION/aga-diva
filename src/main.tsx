@@ -1,10 +1,8 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { createClient } from "@supabase/supabase-js";
-import { jsPDF } from "jspdf";
 import {
   Check,
-  Download,
   Eraser,
   LoaderCircle,
   Send,
@@ -392,6 +390,7 @@ const summarizeArrays = (...values: string[][]) =>
 function App() {
   const [form, setForm] = useState<FormData>(initialForm);
   const [signature, setSignature] = useState("");
+  const [logoLoaded, setLogoLoaded] = useState(false);
   const [isDrawing, setIsDrawing] = useState(false);
   const [status, setStatus] = useState<"idle" | "saving" | "saved" | "error">(
     "idle",
@@ -575,68 +574,19 @@ function App() {
     setMessage("表格已储存到 Supabase / Onboarding form saved to Supabase.");
   };
 
-  const downloadPdf = () => {
-    const doc = new jsPDF({ unit: "pt", format: "letter" });
-    let y = 52;
-
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(18);
-    doc.text("Diva Hair Lounge Team Onboarding", 48, y);
-    y += 28;
-    doc.setFontSize(10);
-    doc.setFont("helvetica", "normal");
-    doc.text(`Generated ${new Date().toLocaleString()}`, 48, y);
-    y += 28;
-
-    sections.forEach((section) => {
-      if (y > 670) {
-        doc.addPage();
-        y = 48;
-      }
-      doc.setFont("helvetica", "bold");
-      doc.text(`${section.number} ${section.title} / ${section.subtitle}`, 48, y);
-      y += 18;
-      doc.setFont("helvetica", "normal");
-
-      section.fields.forEach((field) => {
-        const value = formatValue(form[field.id]);
-        const lines = doc.splitTextToSize(`${field.number}. ${field.label}: ${value}`, 500);
-        if (y + lines.length * 14 > 730) {
-          doc.addPage();
-          y = 48;
-        }
-        doc.text(lines, 48, y);
-        y += lines.length * 14 + 6;
-
-        if (field.detailId) {
-          const detail = formatValue(form[field.detailId]);
-          if (detail !== "-") {
-            const detailLines = doc.splitTextToSize(`Detail: ${detail}`, 500);
-            doc.text(detailLines, 62, y);
-            y += detailLines.length * 14 + 6;
-          }
-        }
-      });
-    });
-
-    if (signature) {
-      if (y > 620) {
-        doc.addPage();
-        y = 48;
-      }
-      doc.setFont("helvetica", "bold");
-      doc.text("64. 签名 Signature", 48, y);
-      doc.addImage(signature, "PNG", 48, y + 12, 220, 80);
-    }
-
-    doc.save("diva-onboarding-form.pdf");
-  };
-
   return (
     <main>
       <div className="progress" style={{ width: `${scrollProgress}%` }} />
       <section className="hero">
-        <div className="logoMark">DIVA</div>
+        <div className={`logoMark ${logoLoaded ? "hasLogo" : ""}`}>
+          <img
+            src="/assets/diva-logo.png"
+            alt="Diva logo"
+            onLoad={() => setLogoLoaded(true)}
+            onError={() => setLogoLoaded(false)}
+          />
+          <span>DIVA</span>
+        </div>
         <p className="eyebrow">Team Onboarding · 团队入职</p>
         <h1>
           Culture
@@ -715,10 +665,6 @@ function App() {
           ))}
 
           <div className="actions">
-            <button type="button" className="secondary" onClick={downloadPdf}>
-              <Download size={18} />
-              导出 PDF / Export
-            </button>
             <button type="submit" disabled={!isReady || status === "saving"}>
               {status === "saving" ? (
                 <LoaderCircle size={18} className="spin" />
@@ -923,12 +869,6 @@ function Field({
       />
     </label>
   );
-}
-
-function formatValue(value: FormValue) {
-  if (Array.isArray(value)) return value.length ? value.join(", ") : "-";
-  if (typeof value === "boolean") return value ? "Yes / 是" : "No / 否";
-  return value || "-";
 }
 
 const rootElement = document.getElementById("root")!;

@@ -97,6 +97,28 @@ textarea {
     #080808;
 }
 
+.logoMark img {
+  position: absolute;
+  inset: 12px;
+  width: calc(100% - 24px);
+  height: calc(100% - 24px);
+  object-fit: contain;
+  opacity: 0;
+  transition: opacity 160ms ease;
+}
+
+.logoMark span {
+  transition: opacity 160ms ease;
+}
+
+.logoMark.hasLogo img {
+  opacity: 1;
+}
+
+.logoMark.hasLogo span {
+  opacity: 0;
+}
+
 .eyebrow {
   position: relative;
   margin: 0 0 14px;
@@ -494,7 +516,7 @@ canvas {
 
 .actions {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
   gap: 12px;
   padding: 0 0 24px;
 }
