@@ -1,5 +1,9 @@
 create schema if not exists miniapp;
 
+alter role authenticator set pgrst.db_schemas = 'public,storage,graphql_public,miniapp';
+notify pgrst, 'reload config';
+notify pgrst, 'reload schema';
+
 create table if not exists miniapp.diva_onboarding_submissions (
   id uuid primary key default gen_random_uuid(),
   session_id uuid references miniapp.sessions(id) on delete set null,
