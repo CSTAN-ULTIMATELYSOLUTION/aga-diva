@@ -513,7 +513,6 @@ function VseWebsite() {
           <a href="#ritual">Ritual</a>
           <a href="#buying">Buy</a>
           <a href="#root-force">Root Force</a>
-          <a href="/form/culture-agreement">HR</a>
         </nav>
       </header>
 
@@ -674,7 +673,6 @@ function VseWebsite() {
 
       <footer className="vseFooter">
         <span>VSÉ</span>
-        <a href="/admin">Admin</a>
       </footer>
     </main>
   );
