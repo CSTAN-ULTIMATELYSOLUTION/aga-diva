@@ -63,45 +63,33 @@ textarea {
   overflow: hidden;
   padding: 56px 24px 48px;
   text-align: center;
-  background: linear-gradient(175deg, #110d04 0%, var(--bg) 55%);
-  border-bottom: 1px solid var(--border-gold);
+  background: #000;
+  border-bottom: 1px solid var(--border);
 }
 
 .hero::before {
-  content: "";
-  position: absolute;
-  top: -70px;
-  left: 50%;
-  width: 520px;
-  height: 310px;
-  transform: translateX(-50%);
-  background: radial-gradient(ellipse, rgba(201, 169, 110, 0.11), transparent 70%);
-  pointer-events: none;
+  content: none;
 }
 
 .logoMark {
   position: relative;
-  width: 124px;
-  height: 124px;
+  width: 176px;
+  height: 78px;
   margin: 0 auto 24px;
-  border: 1px solid rgba(201, 169, 110, 0.45);
-  border-radius: 50%;
   display: grid;
   place-items: center;
   color: var(--gold-light);
   font-family: "Cormorant Garamond", serif;
   font-size: 30px;
   letter-spacing: 0.14em;
-  background:
-    radial-gradient(circle, rgba(201, 169, 110, 0.14), transparent 58%),
-    #080808;
+  background: transparent;
 }
 
 .logoMark img {
   position: absolute;
-  inset: 12px;
-  width: calc(100% - 24px);
-  height: calc(100% - 24px);
+  inset: 0;
+  width: 100%;
+  height: 100%;
   object-fit: contain;
   opacity: 0;
   transition: opacity 160ms ease;
@@ -608,8 +596,8 @@ button:disabled {
   }
 
   .logoMark {
-    width: 104px;
-    height: 104px;
+    width: 150px;
+    height: 66px;
     font-size: 25px;
   }
 
