@@ -33,7 +33,9 @@ create table if not exists miniapp.diva_onboarding_submissions (
 alter table miniapp.diva_onboarding_submissions enable row level security;
 
 grant usage on schema miniapp to anon;
+grant usage on schema miniapp to authenticated;
 grant insert on miniapp.diva_onboarding_submissions to anon;
+grant select on miniapp.diva_onboarding_submissions to authenticated;
 
 create policy "Allow valid public Diva onboarding submissions"
   on miniapp.diva_onboarding_submissions
@@ -50,3 +52,9 @@ create policy "Allow valid public Diva onboarding submissions"
     and policies_acknowledged is true
     and jsonb_typeof(form_payload) = 'object'
   );
+
+create policy "Allow authenticated admins to read Diva onboarding submissions"
+  on miniapp.diva_onboarding_submissions
+  for select
+  to authenticated
+  using (true);

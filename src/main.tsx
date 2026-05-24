@@ -2,11 +2,18 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { createClient } from "@supabase/supabase-js";
 import {
+  Building2,
   Check,
   Eraser,
+  FileText,
   LoaderCircle,
+  LogOut,
+  RefreshCcw,
+  Search,
   Send,
+  ShieldCheck,
   Sparkles,
+  Users,
 } from "lucide-react";
 import "./styles.css";
 
@@ -117,6 +124,31 @@ type SectionConfig = {
   title: string;
   subtitle: string;
   fields: FieldConfig[];
+};
+
+type SubmissionPayload = Partial<FormData> & {
+  department?: string;
+  departmentName?: string;
+  formSlug?: string;
+  formName?: string;
+  signatureCaptured?: boolean;
+  submittedFieldCount?: number;
+};
+
+type SubmissionRow = {
+  id: string;
+  created_at: string;
+  employee_name: string;
+  preferred_name: string | null;
+  email: string;
+  phone: string;
+  emergency_contact_name: string;
+  emergency_contact_phone: string;
+  role_applied_for: string;
+  start_date: string | null;
+  policies_acknowledged: boolean;
+  signature_data_url: string | null;
+  form_payload: SubmissionPayload | null;
 };
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
@@ -384,10 +416,33 @@ const sections: SectionConfig[] = [
   },
 ];
 
+const department = "HR";
+const formSlug = "culture-agreement";
+const formName = "Culture Agreement";
+const formPath = "/form/culture-agreement";
+
 const summarizeArrays = (...values: string[][]) =>
   values.filter((value) => value.length).map((value) => value.join(", ")).join(" | ");
 
 function App() {
+  const [path, setPath] = useState(window.location.pathname);
+
+  useEffect(() => {
+    const onPopState = () => setPath(window.location.pathname);
+    window.addEventListener("popstate", onPopState);
+    return () => window.removeEventListener("popstate", onPopState);
+  }, []);
+
+  const route = path.toLowerCase().replace(/\/+$/, "") || "/";
+
+  if (route === "/admin") {
+    return <AdminPortal />;
+  }
+
+  return <CultureAgreementForm />;
+}
+
+function CultureAgreementForm() {
   const [form, setForm] = useState<FormData>(initialForm);
   const [signature, setSignature] = useState("");
   const [logoLoaded, setLogoLoaded] = useState(false);
@@ -544,6 +599,10 @@ function App() {
       signature_data_url: signature || null,
       form_payload: {
         ...form,
+        department,
+        departmentName: "HR Department",
+        formSlug,
+        formName,
         signatureCaptured: Boolean(signature),
         submittedSectionCount: sections.length,
         submittedFieldCount: 66,
@@ -595,6 +654,7 @@ function App() {
         </h1>
         <div className="rule" />
         <p className="heroSub">入职与文化协议书 · 66 个双语字段 · 请完整填写所有栏目</p>
+        <p className="formPath">{formPath}</p>
         <div className="statusPill">
           <Sparkles size={15} />
           {supabase ? "Supabase configured" : "Supabase env needed"}
@@ -682,6 +742,377 @@ function App() {
       </div>
     </main>
   );
+}
+
+function AdminPortal() {
+  const [logoLoaded, setLogoLoaded] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [isAuthed, setIsAuthed] = useState(false);
+  const [authLoading, setAuthLoading] = useState(Boolean(supabase));
+  const [submissions, setSubmissions] = useState<SubmissionRow[]>([]);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [query, setQuery] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState("");
+
+  useEffect(() => {
+    if (!supabase) return;
+
+    supabase.auth.getSession().then(({ data }) => {
+      const hasSession = Boolean(data.session);
+      setIsAuthed(hasSession);
+      setAuthLoading(false);
+      if (hasSession) void loadSubmissions();
+    });
+
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+      const hasSession = Boolean(session);
+      setIsAuthed(hasSession);
+      if (hasSession) void loadSubmissions();
+      if (!hasSession) setSubmissions([]);
+    });
+
+    return () => listener.subscription.unsubscribe();
+  }, []);
+
+  const loadSubmissions = async () => {
+    if (!supabase) {
+      setMessage("Supabase env needed to receive form submissions.");
+      return;
+    }
+
+    setLoading(true);
+    setMessage("");
+
+    const { data, error } = await supabase
+      .from(tableName)
+      .select(
+        "id, created_at, employee_name, preferred_name, email, phone, emergency_contact_name, emergency_contact_phone, role_applied_for, start_date, policies_acknowledged, signature_data_url, form_payload",
+      )
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      setMessage(error.message);
+      setSubmissions([]);
+    } else {
+      const rows = (data || []) as SubmissionRow[];
+      setSubmissions(rows);
+      setSelectedId((current) => current || rows[0]?.id || null);
+    }
+
+    setLoading(false);
+  };
+
+  const signIn = async (event: React.FormEvent) => {
+    event.preventDefault();
+    if (!supabase) {
+      setMessage("Supabase env needed to sign in.");
+      return;
+    }
+
+    setAuthLoading(true);
+    setMessage("");
+
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (error) setMessage(error.message);
+    setAuthLoading(false);
+  };
+
+  const signOut = async () => {
+    await supabase?.auth.signOut();
+    setIsAuthed(false);
+    setSelectedId(null);
+  };
+
+  const filteredSubmissions = useMemo(() => {
+    const needle = query.trim().toLowerCase();
+    return submissions.filter((submission) => {
+      const payload = submission.form_payload;
+      const matchesDepartment =
+        !payload?.department || payload.department === department;
+      const matchesForm = !payload?.formSlug || payload.formSlug === formSlug;
+      const text = [
+        submission.employee_name,
+        submission.preferred_name,
+        submission.email,
+        submission.phone,
+        payload?.nameCN,
+        payload?.nameEN,
+        payload?.nickname,
+        payload?.icNumber,
+      ]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+
+      return matchesDepartment && matchesForm && (!needle || text.includes(needle));
+    });
+  }, [query, submissions]);
+
+  const selected =
+    filteredSubmissions.find((submission) => submission.id === selectedId) ||
+    filteredSubmissions[0] ||
+    null;
+
+  const signedCount = filteredSubmissions.filter(
+    (submission) => submission.policies_acknowledged,
+  ).length;
+  const pendingCount = filteredSubmissions.filter(
+    (submission) => !submission.start_date,
+  ).length;
+
+  return (
+    <main className="adminPage">
+      <header className="adminTop">
+        <div className={`adminLogo ${logoLoaded ? "hasLogo" : ""}`}>
+          <img
+            src="/assets/diva-logo.png"
+            alt="Diva logo"
+            onLoad={() => setLogoLoaded(true)}
+            onError={() => setLogoLoaded(false)}
+          />
+          <span>DIVA</span>
+        </div>
+        <div>
+          <p>HR Department</p>
+          <h1>Admin Portal</h1>
+          <small>Receive Culture Agreement form submissions</small>
+        </div>
+        {isAuthed && (
+          <button type="button" className="adminIconButton" onClick={signOut}>
+            <LogOut size={16} />
+            Sign out
+          </button>
+        )}
+      </header>
+
+      {!supabase && (
+        <section className="adminNotice">
+          Add `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` to `.env` before
+          the admin portal can receive submissions.
+        </section>
+      )}
+
+      {supabase && !isAuthed && (
+        <form className="adminLogin" onSubmit={signIn}>
+          <div>
+            <p>Secure access</p>
+            <h2>Sign in to view HR forms</h2>
+            <small>
+              This portal reads the `miniapp.diva_onboarding_submissions` table
+              after Supabase Auth confirms the user.
+            </small>
+          </div>
+          <label>
+            Email
+            <input
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+              type="text"
+              inputMode="email"
+              required
+            />
+          </label>
+          <label>
+            Password
+            <input
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+              type="password"
+              required
+            />
+          </label>
+          <button type="submit" disabled={authLoading}>
+            {authLoading ? <LoaderCircle size={18} className="spin" /> : <ShieldCheck size={18} />}
+            Sign in
+          </button>
+          {message && <p className="adminError">{message}</p>}
+        </form>
+      )}
+
+      {supabase && isAuthed && (
+        <div className="adminShell">
+          <section className="adminStats" aria-label="Submission summary">
+            <MetricCard icon={<Building2 size={18} />} label="Department" value="HR" />
+            <MetricCard icon={<FileText size={18} />} label="Form" value={formName} />
+            <MetricCard icon={<Users size={18} />} label="Received" value={String(filteredSubmissions.length)} />
+            <MetricCard icon={<Check size={18} />} label="Acknowledged" value={String(signedCount)} />
+          </section>
+
+          <section className="adminToolbar">
+            <label>
+              <Search size={17} />
+              <input
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+                placeholder="Search name, email, phone, IC..."
+              />
+            </label>
+            <button type="button" className="adminIconButton" onClick={loadSubmissions}>
+              {loading ? <LoaderCircle size={16} className="spin" /> : <RefreshCcw size={16} />}
+              Refresh
+            </button>
+          </section>
+
+          <div className="adminContent">
+            <section className="submissionList" aria-label="Submissions">
+              <div className="listHead">
+                <span>{filteredSubmissions.length} submissions</span>
+                <span>{pendingCount} pending start dates</span>
+              </div>
+              {filteredSubmissions.map((submission) => (
+                <button
+                  type="button"
+                  className={`submissionItem ${selected?.id === submission.id ? "on" : ""}`}
+                  key={submission.id}
+                  onClick={() => setSelectedId(submission.id)}
+                >
+                  <strong>{submission.employee_name}</strong>
+                  <span>{submission.email}</span>
+                  <small>{formatDateTime(submission.created_at)}</small>
+                </button>
+              ))}
+              {!filteredSubmissions.length && (
+                <div className="emptyState">
+                  <FileText size={24} />
+                  No Culture Agreement submissions yet.
+                </div>
+              )}
+            </section>
+
+            <SubmissionDetail submission={selected} />
+          </div>
+
+          {message && <p className="adminError">{message}</p>}
+        </div>
+      )}
+    </main>
+  );
+}
+
+function MetricCard({
+  icon,
+  label,
+  value,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+}) {
+  return (
+    <div className="metricCard">
+      <span>{icon}</span>
+      <small>{label}</small>
+      <strong>{value}</strong>
+    </div>
+  );
+}
+
+function SubmissionDetail({ submission }: { submission: SubmissionRow | null }) {
+  if (!submission) {
+    return (
+      <section className="submissionDetail emptyState">
+        <FileText size={28} />
+        Select a submission to view the full HR form.
+      </section>
+    );
+  }
+
+  const payload = submission.form_payload || {};
+
+  const detailRows = [
+    ["Chinese Name", payload.nameCN],
+    ["English Name", payload.nameEN || submission.employee_name],
+    ["Nickname", payload.nickname || submission.preferred_name],
+    ["IC Number", payload.icNumber],
+    ["Phone", submission.phone],
+    ["Email", submission.email],
+    ["DISC / MBTI", [payload.discType, payload.mbtiType].filter(Boolean).join(" / ")],
+    ["Emergency", `${submission.emergency_contact_name} · ${submission.emergency_contact_phone}`],
+    ["Technical Level", submission.role_applied_for],
+    ["Start Date", submission.start_date],
+    ["Health Notes", payload.healthNotes],
+    ["Final Notes", payload.finalNotes],
+  ];
+
+  return (
+    <section className="submissionDetail">
+      <div className="detailHead">
+        <div>
+          <p>{payload.departmentName || "HR Department"}</p>
+          <h2>{submission.employee_name}</h2>
+          <small>{formName} · {formatDateTime(submission.created_at)}</small>
+        </div>
+        <span className="ackBadge">
+          <ShieldCheck size={15} />
+          {submission.policies_acknowledged ? "Signed" : "Pending"}
+        </span>
+      </div>
+
+      <div className="detailGrid">
+        {detailRows.map(([label, value]) => (
+          <div className="detailCell" key={label}>
+            <small>{label}</small>
+            <strong>{formatAdminValue(value)}</strong>
+          </div>
+        ))}
+      </div>
+
+      <div className="skillPanel">
+        <h3>Technical Skills</h3>
+        <TagList values={payload.haircutSkills} />
+        <TagList values={payload.coloringSkills} />
+        <TagList values={payload.permStraightSkills} />
+        <TagList values={payload.extensionHairpieceSkills} />
+        <TagList values={payload.scalpCareSkills} />
+      </div>
+
+      <div className="skillPanel">
+        <h3>Additional Skills</h3>
+        <TagList values={payload.contentCreation} />
+        <TagList values={payload.softwareSkills} />
+        <TagList values={payload.socialMediaSkills} />
+        <TagList values={payload.businessSkills} />
+        <TagList values={payload.aiSystemSkills} />
+      </div>
+
+      {submission.signature_data_url && (
+        <div className="signaturePreview">
+          <h3>Signature</h3>
+          <img src={submission.signature_data_url} alt="Applicant signature" />
+        </div>
+      )}
+    </section>
+  );
+}
+
+function TagList({ values }: { values?: string[] }) {
+  if (!values?.length) return null;
+  return (
+    <div className="tagList">
+      {values.map((value) => (
+        <span key={value}>{value}</span>
+      ))}
+    </div>
+  );
+}
+
+function formatDateTime(value: string) {
+  return new Intl.DateTimeFormat("en-MY", {
+    dateStyle: "medium",
+    timeStyle: "short",
+  }).format(new Date(value));
+}
+
+function formatAdminValue(value: unknown) {
+  if (Array.isArray(value)) return value.length ? value.join(", ") : "-";
+  if (typeof value === "boolean") return value ? "Yes" : "No";
+  return value ? String(value) : "-";
 }
 
 function Section({
