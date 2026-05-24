@@ -692,9 +692,16 @@ h1 em {
 .vseHeader nav {
   display: flex;
   gap: 14px;
+  max-width: 74vw;
+  overflow-x: auto;
+  scrollbar-width: none;
   font-size: 11px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
+}
+
+.vseHeader nav::-webkit-scrollbar {
+  display: none;
 }
 
 .vseHero {
@@ -753,6 +760,88 @@ h1 em {
   right: 14px;
   bottom: 12px;
   color: #f7f3eb;
+}
+
+.vseQuickOrder {
+  display: grid;
+  gap: 22px;
+  padding: 34px 16px;
+  border-top: 1px solid #15130f;
+  border-bottom: 1px solid #15130f;
+}
+
+.vseQuickOrder p,
+.vseProblem p,
+.vseRitualIntro p,
+.vseStandards > p,
+.vseClosing p {
+  margin: 0;
+  color: #494238;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.vseQuickOrder div {
+  display: grid;
+  gap: 8px;
+}
+
+.vseQuickOrder h2,
+.vseProblem h2,
+.vseRitual h2,
+.vseStandards h2,
+.vseClosing h2 {
+  margin: 0;
+  font-family: "Cormorant Garamond", serif;
+  font-weight: 300;
+  letter-spacing: 0;
+  line-height: 0.96;
+}
+
+.vseQuickOrder h2 {
+  font-size: clamp(42px, 11vw, 92px);
+}
+
+.vseQuickOrder span {
+  font-size: 18px;
+}
+
+.vseQuickOrder a,
+.vseClosing a {
+  justify-self: start;
+  border-bottom: 1px solid currentColor;
+  padding-bottom: 6px;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.vseProblem {
+  display: grid;
+  gap: 42px;
+  padding: 82px 16px 70px;
+}
+
+.vseProblem h2 {
+  max-width: 920px;
+  font-size: clamp(50px, 13vw, 134px);
+}
+
+.vseProblem ul,
+.vseStandards ul {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid #15130f;
+}
+
+.vseProblem li,
+.vseStandards li {
+  padding: 17px 0;
+  border-bottom: 1px solid #15130f;
+  line-height: 1.45;
 }
 
 .vseStatement {
@@ -888,10 +977,80 @@ h1 em {
   line-height: 1.65;
 }
 
+.vseRitual {
+  display: grid;
+  gap: 42px;
+  padding: 0 16px 92px;
+}
+
+.vseRitual h2 {
+  max-width: 980px;
+  font-size: clamp(46px, 11vw, 118px);
+}
+
+.vseRitualSteps {
+  display: grid;
+  border-top: 1px solid #15130f;
+}
+
+.vseRitualSteps article {
+  display: grid;
+  gap: 12px;
+  padding: 22px 0;
+  border-bottom: 1px solid #15130f;
+}
+
+.vseRitualSteps span {
+  color: #665f51;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+}
+
+.vseRitualSteps h3 {
+  margin: 0;
+  font-family: "Cormorant Garamond", serif;
+  font-size: clamp(34px, 8vw, 72px);
+  font-weight: 300;
+  line-height: 0.98;
+}
+
+.vseRitualSteps p {
+  max-width: 520px;
+  margin: 0;
+  color: #494238;
+  line-height: 1.6;
+}
+
+.vseStandards {
+  display: grid;
+  gap: 38px;
+  padding: 84px 16px;
+  background: #0b0b09;
+  color: #f7f3eb;
+}
+
+.vseStandards > p {
+  color: #b8aa8d;
+}
+
+.vseStandards h2 {
+  max-width: 920px;
+  font-size: clamp(54px, 14vw, 150px);
+}
+
+.vseStandards ul {
+  border-top-color: rgba(247, 243, 235, 0.34);
+}
+
+.vseStandards li {
+  border-bottom-color: rgba(247, 243, 235, 0.34);
+  color: #ded7c9;
+}
+
 .vseBuying {
   display: grid;
   gap: 38px;
-  padding: 0 16px 90px;
+  padding: 86px 16px 90px;
 }
 
 .vseBuying p {
@@ -927,6 +1086,20 @@ h1 em {
   line-height: 1.5;
 }
 
+.vseClosing {
+  display: grid;
+  min-height: 68svh;
+  align-content: center;
+  justify-items: center;
+  gap: 26px;
+  padding: 90px 16px;
+  text-align: center;
+}
+
+.vseClosing h2 {
+  font-size: clamp(64px, 18vw, 180px);
+}
+
 .vseFooter {
   display: flex;
   justify-content: space-between;
@@ -957,6 +1130,7 @@ h1 em {
 
   .vseHeader nav {
     gap: 28px;
+    max-width: none;
   }
 
   .vseHero {
@@ -974,6 +1148,23 @@ h1 em {
 
   .vseHeroText h1 {
     font-size: clamp(86px, 10.5vw, 162px);
+  }
+
+  .vseQuickOrder {
+    grid-template-columns: minmax(170px, 2fr) minmax(0, 7fr) auto;
+    align-items: end;
+    gap: 6vw;
+    padding: 42px 24px;
+  }
+
+  .vseProblem {
+    grid-template-columns: minmax(0, 7fr) minmax(320px, 4fr);
+    gap: 8.333vw;
+    padding: 132px 24px 118px;
+  }
+
+  .vseProblem ul {
+    align-self: end;
   }
 
   .vseProductGrid {
@@ -995,10 +1186,42 @@ h1 em {
     padding-left: 18px;
   }
 
+  .vseRitual {
+    gap: 64px;
+    padding: 0 24px 132px;
+  }
+
+  .vseRitualSteps {
+    grid-template-columns: repeat(3, 1fr);
+    border-bottom: 1px solid #15130f;
+  }
+
+  .vseRitualSteps article {
+    padding: 28px 24px 36px 0;
+    border-bottom: 0;
+  }
+
+  .vseRitualSteps article + article {
+    border-left: 1px solid #15130f;
+    padding-left: 24px;
+  }
+
+  .vseStandards {
+    grid-template-columns: minmax(170px, 2fr) minmax(0, 6fr) minmax(320px, 4fr);
+    align-items: start;
+    gap: 5vw;
+    padding: 132px 24px;
+  }
+
   .vseBuying {
     grid-template-columns: minmax(0, 7fr) minmax(320px, 4fr);
     gap: 8.333vw;
-    padding: 0 24px 132px;
+    padding: 132px 24px;
+  }
+
+  .vseClosing {
+    min-height: 78svh;
+    padding: 130px 24px;
   }
 
   .vseFooter {

@@ -453,6 +453,12 @@ function App() {
 
 function VseWebsite() {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
+  const concernItems = [
+    "Oily roots that return too quickly",
+    "Flat hair that loses lift after cleansing",
+    "Dry, tight, or uncomfortable scalp feel",
+    "Daily wash routines that feel too harsh",
+  ];
   const indexItems = [
     {
       title: "Scalp therapy",
@@ -475,6 +481,26 @@ function VseWebsite() {
         "Supports the foundation of healthy-looking hair by keeping roots fresh, light, and resilient.",
     },
   ];
+  const ritualSteps = [
+    {
+      title: "First cleanse",
+      detail: "Lift oil, sweat, and product residue with a quiet scalp massage.",
+    },
+    {
+      title: "Second cleanse",
+      detail: "Let the foam settle into a softer ritual, then rinse until the root feels light.",
+    },
+    {
+      title: "Finish calm",
+      detail: "Follow with gentle towel pressure and keep heavy styling away from the root.",
+    },
+  ];
+  const standards = [
+    "Plant-derived cleansing base",
+    "Scalp comfort focus",
+    "Salon ritual finish",
+    "Daily resilience support",
+  ];
 
   return (
     <main className="vseSite">
@@ -482,12 +508,14 @@ function VseWebsite() {
         <a href="/" aria-label="VSÉ home">VSÉ</a>
         <nav aria-label="Website navigation">
           <a href="#therapy">Therapy</a>
+          <a href="#ritual">Ritual</a>
+          <a href="#buying">Buy</a>
           <a href="#root-force">Root Force</a>
           <a href="/form/culture-agreement">HR</a>
         </nav>
       </header>
 
-      <section className="vseHero">
+      <section className="vseHero" aria-label="01 Hero">
         <div className="vseHeroText">
           <p>Premium plant-based scalp therapy haircare</p>
           <h1>
@@ -504,20 +532,41 @@ function VseWebsite() {
         </figure>
       </section>
 
-      <section className="vseStatement" id="therapy">
+      <section className="vseQuickOrder" aria-label="02 Quick order">
+        <p>02 / Conversion priority</p>
+        <div>
+          <h2>Root Force Shampoo</h2>
+          <span>RM138-168</span>
+        </div>
+        <a href="#buying">Begin consultation</a>
+      </section>
+
+      <section className="vseProblem" aria-label="03 Scalp concerns">
+        <div>
+          <p>03 / Scalp condition</p>
+          <h2>A calm scalp is the first luxury.</h2>
+        </div>
+        <ul>
+          {concernItems.map((item) => (
+            <li key={item}>{item}</li>
+          ))}
+        </ul>
+      </section>
+
+      <section className="vseStatement" id="therapy" aria-label="04 Therapy philosophy">
         <p>
           VSÉ treats the scalp as living terrain: calm the root, restore the
           balance, and let healthy hair begin where it should.
         </p>
       </section>
 
-      <section className="vseFullBleed" aria-label="Botanical scalp therapy visual">
+      <section className="vseFullBleed" aria-label="05 Botanical scalp therapy visual">
         <img src="/assets/vse-botanical-field.svg" alt="Botanical field texture for scalp therapy" />
       </section>
 
-      <section className="vseProductGrid" id="root-force">
+      <section className="vseProductGrid" id="root-force" aria-label="06 Product details">
         <div>
-          <p>Root Force Shampoo</p>
+          <p>06 / Root Force Shampoo</p>
           <h2>Plant-based cleanse for scalp strength.</h2>
         </div>
         <div className="vseCopy">
@@ -543,7 +592,7 @@ function VseWebsite() {
         </div>
       </section>
 
-      <section className="vseIndex" aria-label="Root Force details">
+      <section className="vseIndex" aria-label="07 Root Force details">
         {indexItems.map((item, index) => {
           const isOpen = openIndex === index;
           return (
@@ -563,9 +612,35 @@ function VseWebsite() {
         })}
       </section>
 
-      <section className="vseBuying" aria-label="Buying method">
+      <section className="vseRitual" id="ritual" aria-label="08 Wash ritual">
+        <div className="vseRitualIntro">
+          <p>08 / Wash ritual</p>
+          <h2>Slow at the basin. Light at the root.</h2>
+        </div>
+        <div className="vseRitualSteps">
+          {ritualSteps.map((step, index) => (
+            <article key={step.title}>
+              <span>{String(index + 1).padStart(2, "0")}</span>
+              <h3>{step.title}</h3>
+              <p>{step.detail}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="vseStandards" aria-label="09 Formula standards">
+        <p>09 / Formula standard</p>
+        <h2>Clean, quiet, exacting.</h2>
+        <ul>
+          {standards.map((item) => (
+            <li key={item}>{item}</li>
+          ))}
+        </ul>
+      </section>
+
+      <section className="vseBuying" id="buying" aria-label="10 Buying method">
         <div>
-          <p>Buying method</p>
+          <p>10 / Buying method</p>
           <h2>Order through VSÉ consultation.</h2>
         </div>
         <ol>
@@ -582,6 +657,12 @@ function VseWebsite() {
             Pay by transfer or e-wallet, then arrange pickup or delivery.
           </li>
         </ol>
+      </section>
+
+      <section className="vseClosing" aria-label="11 Closing">
+        <p>11 / Begin</p>
+        <h2>Begin at the root.</h2>
+        <a href="#buying">Order Root Force</a>
       </section>
 
       <footer className="vseFooter">
