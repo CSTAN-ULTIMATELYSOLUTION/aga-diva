@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { createClient } from "@supabase/supabase-js";
 import { jsPDF } from "jspdf";
@@ -108,7 +108,38 @@ function App() {
     "idle",
   );
   const [message, setMessage] = useState("");
+  const [activeSection, setActiveSection] = useState("personal");
+  const [scrollProgress, setScrollProgress] = useState(0);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+
+  const sections = [
+    { id: "personal", number: "01", nav: "Personal", title: "个人资料", subtitle: "Personal Information" },
+    { id: "emergency", number: "02", nav: "Emergency", title: "紧急联系人", subtitle: "Emergency Contact" },
+    { id: "role", number: "03", nav: "Role", title: "岗位与时间", subtitle: "Role And Availability" },
+    { id: "experience", number: "04", nav: "Skills", title: "美发经验", subtitle: "Salon Experience" },
+    { id: "payroll", number: "05", nav: "Payroll", title: "薪资资料", subtitle: "Payroll Details" },
+    { id: "sign", number: "06", nav: "Sign", title: "确认签署", subtitle: "Acknowledgement" },
+  ];
+
+  useEffect(() => {
+    const onScroll = () => {
+      const max = document.documentElement.scrollHeight - window.innerHeight;
+      setScrollProgress(max > 0 ? (window.scrollY / max) * 100 : 0);
+
+      const current =
+        [...sections]
+          .reverse()
+          .find((section) => {
+            const element = document.getElementById(section.id);
+            return element ? element.offsetTop - 160 <= window.scrollY : false;
+          })?.id || sections[0].id;
+      setActiveSection(current);
+    };
+
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   const isReady = useMemo(
     () =>
@@ -148,7 +179,7 @@ function App() {
     context.moveTo(x, y);
     context.lineWidth = 2.4;
     context.lineCap = "round";
-    context.strokeStyle = "#251b18";
+    context.strokeStyle = "#edd9a3";
     setIsDrawing(true);
   };
 
@@ -265,24 +296,42 @@ function App() {
   };
 
   return (
-    <main className="shell">
-      <section className="intro">
-        <div>
-          <p className="eyebrow">Diva Hair Lounge</p>
-          <h1>Team Onboarding Form</h1>
-          <p className="introText">
-            Capture employee intake details, acknowledge policies, collect a
-            signature, and submit the record to your existing Supabase database.
-          </p>
-        </div>
+    <main>
+      <div className="progress" style={{ width: `${scrollProgress}%` }} />
+      <section className="hero">
+        <div className="logoMark">DIVA</div>
+        <p className="eyebrow">Team Onboarding · 团队入职</p>
+        <h1>
+          Culture
+          <br />
+          <em>Agreement</em>
+        </h1>
+        <div className="rule" />
+        <p className="heroSub">入职与文化协议书 · 请完整填写所有栏目</p>
         <div className="statusPill">
-          <Sparkles size={16} />
+          <Sparkles size={15} />
           {supabase ? "Supabase configured" : "Supabase env needed"}
         </div>
       </section>
 
+      <nav className="sectionNav" aria-label="Onboarding sections">
+        <div className="sectionNavInner">
+          {sections.map((section) => (
+            <a
+              className={`navPill ${activeSection === section.id ? "on" : ""}`}
+              href={`#${section.id}`}
+              key={section.id}
+            >
+              <span>{section.number}</span>
+              {section.nav}
+            </a>
+          ))}
+        </div>
+      </nav>
+
+      <div className="shell">
       <form className="form" onSubmit={submit}>
-        <Section title="Personal Details">
+        <Section {...sections[0]}>
           <Input label="Legal name" value={form.employeeName} required onChange={(value) => update("employeeName", value)} />
           <Input label="Preferred name" value={form.preferredName} onChange={(value) => update("preferredName", value)} />
           <Input label="Email" type="email" value={form.email} required onChange={(value) => update("email", value)} />
@@ -291,26 +340,26 @@ function App() {
           <TextArea label="Home address" value={form.address} onChange={(value) => update("address", value)} />
         </Section>
 
-        <Section title="Emergency Contact">
+        <Section {...sections[1]}>
           <Input label="Contact name" value={form.emergencyContactName} required onChange={(value) => update("emergencyContactName", value)} />
           <Input label="Contact phone" value={form.emergencyContactPhone} required onChange={(value) => update("emergencyContactPhone", value)} />
         </Section>
 
-        <Section title="Role And Availability">
+        <Section {...sections[2]}>
           <Input label="Role" value={form.roleAppliedFor} required placeholder="Stylist, assistant, front desk..." onChange={(value) => update("roleAppliedFor", value)} />
           <Select label="Employment type" value={form.employmentType} onChange={(value) => update("employmentType", value)} options={["Full time", "Part time", "Contract", "Apprentice"]} />
           <Input label="Target start date" type="date" value={form.startDate} onChange={(value) => update("startDate", value)} />
           <TextArea label="Availability" value={form.scheduleAvailability} placeholder="Weekdays, weekends, preferred shifts..." onChange={(value) => update("scheduleAvailability", value)} />
         </Section>
 
-        <Section title="Experience">
+        <Section {...sections[3]}>
           <TextArea label="Salon experience" value={form.salonExperience} onChange={(value) => update("salonExperience", value)} />
           <TextArea label="Licenses or certifications" value={form.certifications} onChange={(value) => update("certifications", value)} />
           <TextArea label="Strengths" value={form.strengths} onChange={(value) => update("strengths", value)} />
           <TextArea label="Growth goals" value={form.growthGoals} onChange={(value) => update("growthGoals", value)} />
         </Section>
 
-        <Section title="Payroll Details">
+        <Section {...sections[4]}>
           <Input label="Uniform size" value={form.uniformSize} onChange={(value) => update("uniformSize", value)} />
           <Input label="Payroll name" value={form.payrollName} onChange={(value) => update("payrollName", value)} />
           <Input label="Bank name" value={form.bankName} onChange={(value) => update("bankName", value)} />
@@ -318,7 +367,11 @@ function App() {
           <Input label="Tax ID last 4" value={form.taxIdLast4} maxLength={4} onChange={(value) => update("taxIdLast4", value)} />
         </Section>
 
-        <Section title="Acknowledgement">
+        <Section {...sections[5]}>
+          <div className="quoteBlock">
+            “I understand that Diva Hair Lounge is built on craft, discipline,
+            service, and teamwork.”
+          </div>
           <label className="checkRow">
             <input
               type="checkbox"
@@ -372,20 +425,33 @@ function App() {
 
         {message && <p className={`message ${status}`}>{message}</p>}
       </form>
+      </div>
     </main>
   );
 }
 
 function Section({
+  id,
+  number,
   title,
+  subtitle,
   children,
 }: {
+  id: string;
+  number: string;
   title: string;
+  subtitle: string;
   children: React.ReactNode;
 }) {
   return (
-    <section className="section">
-      <h2>{title}</h2>
+    <section className="section" id={id}>
+      <div className="sectionHead">
+        <div className="sectionNumber">{number}</div>
+        <h2>
+          {title}
+          <small>{subtitle}</small>
+        </h2>
+      </div>
       <div className="grid">{children}</div>
     </section>
   );
@@ -410,11 +476,12 @@ function Input({
 }) {
   return (
     <label className="field">
-      <span>{label}</span>
+      <span>{label}{required && <em>*</em>}</span>
       <input
         value={value}
         onChange={(event) => onChange(event.target.value)}
-        type={type}
+        type={type === "email" ? "text" : type}
+        inputMode={type === "email" ? "email" : undefined}
         required={required}
         placeholder={placeholder}
         maxLength={maxLength}
@@ -472,4 +539,10 @@ function TextArea({
   );
 }
 
-createRoot(document.getElementById("root")!).render(<App />);
+const rootElement = document.getElementById("root")!;
+const windowWithRoot = window as typeof window & {
+  __divaOnboardingRoot?: ReturnType<typeof createRoot>;
+};
+
+windowWithRoot.__divaOnboardingRoot ??= createRoot(rootElement);
+windowWithRoot.__divaOnboardingRoot.render(<App />);
