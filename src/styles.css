@@ -216,7 +216,7 @@ h1 em {
 }
 
 .shell {
-  width: min(660px, calc(100% - 36px));
+  width: min(760px, calc(100% - 36px));
   margin: 0 auto;
 }
 
@@ -290,13 +290,16 @@ h1 em {
 .field.wide,
 .quoteBlock,
 .checkRow,
-.signatureBox {
+.choiceBlock,
+.signatureBox,
+.detailField {
   grid-column: 1 / -1;
 }
 
 .field span,
 .signatureHeader,
-.checkRow {
+.checkRow,
+.choiceBlock legend {
   color: var(--text-dim);
   font-size: 11px;
   font-weight: 400;
@@ -304,7 +307,9 @@ h1 em {
   text-transform: uppercase;
 }
 
-.field span em {
+.field span em,
+.checkRow em,
+.choiceBlock legend em {
   margin-left: 3px;
   color: var(--gold);
   font-style: normal;
@@ -363,6 +368,16 @@ textarea:focus {
   text-align: center;
 }
 
+.quoteBlock small {
+  display: block;
+  margin-top: 10px;
+  color: var(--text-dim);
+  font-family: "Outfit", sans-serif;
+  font-size: 12px;
+  font-style: normal;
+  letter-spacing: 0.8px;
+}
+
 .checkRow {
   display: flex;
   align-items: flex-start;
@@ -373,7 +388,8 @@ textarea:focus {
   text-transform: none;
 }
 
-.checkRow input {
+.checkRow input,
+.choice input {
   width: 18px;
   height: 18px;
   flex: 0 0 auto;
@@ -386,6 +402,68 @@ textarea:focus {
   font-size: 14px;
   letter-spacing: 0;
   text-transform: none;
+}
+
+.checkRow strong {
+  color: var(--gold);
+  font-weight: 500;
+}
+
+.choiceBlock {
+  min-width: 0;
+  margin: 0;
+  border: 1px solid rgba(201, 169, 110, 0.18);
+  border-radius: 12px;
+  padding: 17px 16px 16px;
+  background: rgba(10, 10, 10, 0.42);
+}
+
+.choiceBlock legend {
+  padding: 0 8px;
+  color: var(--gold-light);
+}
+
+.choiceGrid,
+.yesNoGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.choice {
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+  min-height: 48px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px;
+  color: var(--text-dim);
+  background: var(--bg3);
+  line-height: 1.35;
+  transition: border-color 160ms ease, background 160ms ease, color 160ms ease;
+}
+
+.choice:has(input:checked) {
+  border-color: rgba(201, 169, 110, 0.72);
+  color: var(--gold-light);
+  background: #140f06;
+}
+
+.choice span {
+  padding-top: 1px;
+  font-size: 13px;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.ynChoice {
+  justify-content: center;
+  min-height: 44px;
+}
+
+.detailTextarea {
+  margin-top: 12px;
 }
 
 .signatureBox {
@@ -524,6 +602,11 @@ button:disabled {
   .grid {
     grid-template-columns: 1fr;
     padding: 20px;
+  }
+
+  .choiceGrid,
+  .yesNoGrid {
+    grid-template-columns: 1fr;
   }
 
   .sectionHead {
