@@ -6,6 +6,7 @@ import {
   Check,
   Eraser,
   FileText,
+  Globe2,
   LoaderCircle,
   LogOut,
   RefreshCcw,
@@ -750,6 +751,7 @@ function CultureAgreementForm() {
 
 function AdminPortal() {
   const [logoLoaded, setLogoLoaded] = useState(false);
+  const [activeAdminTab, setActiveAdminTab] = useState<"forms" | "website">("forms");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isAuthed, setIsAuthed] = useState(false);
@@ -941,35 +943,63 @@ function AdminPortal() {
 
       {supabase && isAuthed && (
         <div className="adminShell">
-          <section className="adminStats" aria-label="Submission summary">
-            <MetricCard icon={<Building2 size={18} />} label="Department" value="HR" />
-            <MetricCard icon={<FileText size={18} />} label="Form" value={formName} />
-            <MetricCard icon={<Users size={18} />} label="Received" value={String(filteredSubmissions.length)} />
-            <MetricCard icon={<Check size={18} />} label="Acknowledged" value={String(signedCount)} />
-          </section>
-
-          <section className="adminToolbar">
-            <label>
-              <Search size={17} />
-              <input
-                value={query}
-                onChange={(event) => setQuery(event.target.value)}
-                placeholder="Search name, email, phone, IC..."
-              />
-            </label>
-            <button type="button" className="adminIconButton" onClick={loadSubmissions}>
-              {loading ? <LoaderCircle size={16} className="spin" /> : <RefreshCcw size={16} />}
-              Refresh
+          <aside className="adminSidebar" aria-label="Admin navigation">
+            <button
+              type="button"
+              className={activeAdminTab === "forms" ? "on" : ""}
+              onClick={() => setActiveAdminTab("forms")}
+            >
+              <FileText size={18} />
+              <span>
+                HR Forms
+                <small>Culture Agreement</small>
+              </span>
             </button>
-          </section>
+            <button
+              type="button"
+              className={activeAdminTab === "website" ? "on" : ""}
+              onClick={() => setActiveAdminTab("website")}
+            >
+              <Globe2 size={18} />
+              <span>
+                Website
+                <small>Coming soon</small>
+              </span>
+            </button>
+          </aside>
 
-          <div className="adminContent">
-            <section className="submissionList" aria-label="Submissions">
-              <div className="listHead">
-                <span>{filteredSubmissions.length} submissions</span>
-                <span>{pendingCount} pending start dates</span>
-              </div>
-              {filteredSubmissions.map((submission) => (
+          <section className="adminPanel">
+            {activeAdminTab === "forms" ? (
+              <>
+                <section className="adminStats" aria-label="Submission summary">
+                  <MetricCard icon={<Building2 size={18} />} label="Department" value="HR" />
+                  <MetricCard icon={<FileText size={18} />} label="Form" value={formName} />
+                  <MetricCard icon={<Users size={18} />} label="Received" value={String(filteredSubmissions.length)} />
+                  <MetricCard icon={<Check size={18} />} label="Acknowledged" value={String(signedCount)} />
+                </section>
+
+                <section className="adminToolbar">
+                  <label>
+                    <Search size={17} />
+                    <input
+                      value={query}
+                      onChange={(event) => setQuery(event.target.value)}
+                      placeholder="Search name, email, phone, IC..."
+                    />
+                  </label>
+                  <button type="button" className="adminIconButton" onClick={loadSubmissions}>
+                    {loading ? <LoaderCircle size={16} className="spin" /> : <RefreshCcw size={16} />}
+                    Refresh
+                  </button>
+                </section>
+
+                <div className="adminContent">
+                  <section className="submissionList" aria-label="Submissions">
+                    <div className="listHead">
+                      <span>{filteredSubmissions.length} submissions</span>
+                      <span>{pendingCount} pending start dates</span>
+                    </div>
+                    {filteredSubmissions.map((submission) => (
                 <button
                   type="button"
                   className={`submissionItem ${selected?.id === submission.id ? "on" : ""}`}
@@ -980,19 +1010,34 @@ function AdminPortal() {
                   <span>{submission.email}</span>
                   <small>{formatDateTime(submission.created_at)}</small>
                 </button>
-              ))}
-              {!filteredSubmissions.length && (
-                <div className="emptyState">
-                  <FileText size={24} />
-                  No Culture Agreement submissions yet.
+                    ))}
+                    {!filteredSubmissions.length && (
+                      <div className="emptyState">
+                        <FileText size={24} />
+                        No Culture Agreement submissions yet.
+                      </div>
+                    )}
+                  </section>
+
+                  <SubmissionDetail submission={selected} />
                 </div>
-              )}
-            </section>
+              </>
+            ) : (
+              <section className="websiteComingSoon">
+                <div>
+                  <Globe2 size={38} />
+                  <p>Website</p>
+                  <h2>Coming Soon</h2>
+                  <small>
+                    The public website area is reserved here. Forms and admin
+                    tools can stay separate while the website is being designed.
+                  </small>
+                </div>
+              </section>
+            )}
 
-            <SubmissionDetail submission={selected} />
-          </div>
-
-          {message && <p className="adminError">{message}</p>}
+            {message && <p className="adminError">{message}</p>}
+          </section>
         </div>
       )}
     </main>

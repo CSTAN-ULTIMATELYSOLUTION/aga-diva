@@ -266,6 +266,62 @@ h1 em {
   margin: 0 auto;
 }
 
+.adminShell {
+  display: grid;
+  gap: 12px;
+}
+
+.adminSidebar {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  align-self: start;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 10px;
+  background: var(--bg2);
+}
+
+.adminSidebar button {
+  justify-content: flex-start;
+  min-height: 68px;
+  border-color: transparent;
+  border-radius: 10px;
+  padding: 12px;
+  color: var(--text-dim);
+  background: transparent;
+  text-align: left;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.adminSidebar button.on {
+  border-color: var(--border-gold);
+  color: var(--gold-light);
+  background: #140f06;
+}
+
+.adminSidebar button span {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.adminSidebar button small {
+  overflow: hidden;
+  color: var(--text-faint);
+  font-size: 11px;
+  font-weight: 300;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.adminPanel {
+  min-width: 0;
+}
+
 .adminLogin,
 .adminNotice {
   display: grid;
@@ -542,6 +598,52 @@ h1 em {
   text-align: center;
 }
 
+.websiteComingSoon {
+  display: grid;
+  min-height: min(620px, calc(100vh - 210px));
+  place-items: center;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 28px;
+  background: var(--bg2);
+  text-align: center;
+}
+
+.websiteComingSoon > div {
+  display: grid;
+  justify-items: center;
+  max-width: 520px;
+}
+
+.websiteComingSoon svg {
+  margin-bottom: 18px;
+  color: var(--gold);
+}
+
+.websiteComingSoon p {
+  margin-bottom: 10px;
+  color: var(--gold);
+  font-size: 11px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+}
+
+.websiteComingSoon h2 {
+  margin: 0;
+  color: var(--text);
+  font-family: "Cormorant Garamond", serif;
+  font-size: clamp(48px, 10vw, 96px);
+  font-weight: 300;
+  line-height: 0.95;
+}
+
+.websiteComingSoon small {
+  display: block;
+  margin-top: 18px;
+  color: var(--text-dim);
+  line-height: 1.7;
+}
+
 .adminError {
   margin: 0;
   padding: 12px 14px;
@@ -554,6 +656,19 @@ h1 em {
 .emptyRoot {
   min-height: 100vh;
   background: #000;
+}
+
+@media (min-width: 900px) {
+  .adminShell {
+    grid-template-columns: 220px minmax(0, 1fr);
+    align-items: start;
+  }
+
+  .adminSidebar {
+    position: sticky;
+    top: 18px;
+    grid-template-columns: 1fr;
+  }
 }
 
 .sectionNav {
