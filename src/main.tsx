@@ -410,12 +410,12 @@ const sections: SectionConfig[] = [
     number: "⑦",
     nav: "前区 Front",
     title: "前区形象与迎宾意识",
-    subtitle: "Front Area Image And Welcoming Awareness",
+    subtitle: "Front Space & Customer Presence",
     fields: [
-      { id: "frontImage", number: 45, label: "我理解并愿意配合店面形象管理 / I understand and will cooperate with store image management", type: "checkbox" },
-      { id: "frontProfessional", number: 46, label: "我愿意保持专业与良好工作状态 / I am willing to maintain a professional and positive work state", type: "checkbox" },
-      { id: "frontGreeting", number: 47, label: "我理解前区迎宾感的重要性 / I understand the importance of front-area welcoming presence", type: "checkbox" },
-      { id: "frontNotes", number: 48, label: "意见/备注 Comments / Notes", type: "textarea" },
+      { id: "frontImage", number: 45, label: "我理解并愿意配合店面形象管理", type: "checkbox" },
+      { id: "frontProfessional", number: 46, label: "我愿意保持专业与良好工作状态", type: "checkbox" },
+      { id: "frontGreeting", number: 47, label: "我理解前区迎宾感的重要性", type: "checkbox" },
+      { id: "frontNotes", number: 48, label: "意见 / 备注", type: "textarea" },
     ],
   },
   {
@@ -1653,11 +1653,7 @@ function SectionContent({ sectionId }: { sectionId: string }) {
     return (
       <div className="contentBlock">
         <p>我们相信，一个有温度与活力的空间，会让客户更愿意走进来。</p>
-        <ul className="policyList compact">
-          <li>保持前区整洁</li>
-          <li>主动迎宾</li>
-          <li>空档时保持专业状态</li>
-        </ul>
+        <p>空档时间，团队成员应保持前区可见度与专业状态，共同维护店面的服务氛围与品牌形象。</p>
       </div>
     );
   }
