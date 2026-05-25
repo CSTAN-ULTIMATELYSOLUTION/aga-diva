@@ -104,15 +104,26 @@ type FieldType =
   | "checkbox"
   | "checkboxGroup"
   | "radioGroup"
-  | "yesNoDetail";
+  | "yesNoDetail"
+  | "sectionBreak";
+
+type AutoFormat = "ic" | "phone" | "social";
 
 type FieldConfig = {
-  id: keyof FormData;
-  number: number;
+  id?: keyof FormData;
+  number?: number;
   label: string;
   type: FieldType;
   required?: boolean;
   placeholder?: string;
+  helperText?: string;
+  validationMessage?: string;
+  pattern?: RegExp;
+  maxLength?: number;
+  min?: number;
+  max?: number;
+  maxDate?: "today";
+  autoFormat?: AutoFormat;
   options?: string[];
   detailId?: keyof FormData;
   detailPlaceholder?: string;
@@ -150,6 +161,13 @@ type SubmissionRow = {
   policies_acknowledged: boolean;
   signature_data_url: string | null;
   form_payload: SubmissionPayload | null;
+};
+
+type ValidationIssue = {
+  id: keyof FormData | "signature";
+  section: string;
+  label: string;
+  message: string;
 };
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
@@ -246,24 +264,50 @@ const sections: SectionConfig[] = [
     title: "个人资料",
     subtitle: "Personal Information",
     fields: [
-      { id: "nameCN", number: 1, label: "中文姓名 Chinese Name", type: "text", required: true },
-      { id: "nameEN", number: 2, label: "英文姓名 English Name", type: "text", required: true },
-      { id: "nickname", number: 3, label: "昵称 Nickname", type: "text" },
-      { id: "age", number: 4, label: "年龄 Age", type: "number" },
-      { id: "icNumber", number: 5, label: "身份证号码 IC Number", type: "text", required: true },
-      { id: "dob", number: 6, label: "出生日期 Date of Birth", type: "date", required: true },
-      { id: "phone", number: 7, label: "电话号码 Phone", type: "tel", required: true },
-      { id: "email", number: 8, label: "Email", type: "email", required: true },
-      { id: "homeAddress", number: 9, label: "住家地址 Home Address", type: "textarea" },
-      { id: "instagram", number: 10, label: "Instagram", type: "text" },
-      { id: "tiktok", number: 11, label: "TikTok", type: "text" },
-      { id: "xiaohongshu", number: 12, label: "小红书 Xiaohongshu", type: "text" },
-      { id: "facebook", number: 13, label: "Facebook", type: "text" },
+      { type: "sectionBreak", label: "基本资料 Basic Info" },
+      { id: "nameCN", number: 1, label: "中文姓名 Chinese Name", type: "text", required: true, placeholder: "例如：陈美玲" },
+      { id: "nameEN", number: 2, label: "英文姓名 English Name", type: "text", required: true, placeholder: "Example: Tan Mei Ling" },
+      { id: "nickname", number: 3, label: "昵称 Nickname", type: "text", placeholder: "团队常用称呼 / Preferred name" },
+      { id: "age", number: 4, label: "年龄 Age", type: "number", min: 15, max: 80, helperText: "请输入 15-80 之间的数字 / Enter a number from 15 to 80" },
+      {
+        id: "icNumber",
+        number: 5,
+        label: "身份证号码 IC Number",
+        type: "text",
+        required: true,
+        placeholder: "990101-14-1234",
+        helperText: "请输入马来西亚 IC，例如 990101-14-1234 或 990101141234",
+        validationMessage: "IC 需要 12 个数字，可输入 990101-14-1234 或 990101141234",
+        maxLength: 14,
+        autoFormat: "ic",
+      },
+      { id: "dob", number: 6, label: "出生日期 Date of Birth", type: "date", required: true, maxDate: "today", helperText: "请选择真实出生日期，不能是未来日期" },
+      { type: "sectionBreak", label: "联系方式 Contact" },
+      {
+        id: "phone",
+        number: 7,
+        label: "电话号码 Phone",
+        type: "tel",
+        required: true,
+        placeholder: "012-345 6789",
+        helperText: "请输入马来西亚手机号，例如 012-345 6789 或 +60 12-345 6789",
+        validationMessage: "电话格式需为马来西亚手机号，例如 012-345 6789 或 +60 12-345 6789",
+        autoFormat: "phone",
+      },
+      { id: "email", number: 8, label: "Email", type: "email", required: true, placeholder: "name@email.com", helperText: "例如 name@email.com" },
+      { id: "homeAddress", number: 9, label: "住家地址 Home Address", type: "textarea", placeholder: "请输入完整住址 / Enter full home address" },
+      { type: "sectionBreak", label: "社交媒体 Social Media" },
+      { id: "instagram", number: 10, label: "Instagram", type: "text", placeholder: "@username", helperText: "请输入 @username 或个人主页链接", autoFormat: "social" },
+      { id: "tiktok", number: 11, label: "TikTok", type: "text", placeholder: "@username", helperText: "请输入 @username 或个人主页链接", autoFormat: "social" },
+      { id: "xiaohongshu", number: 12, label: "小红书 Xiaohongshu", type: "text", placeholder: "@username", helperText: "请输入 @username 或个人主页链接", autoFormat: "social" },
+      { id: "facebook", number: 13, label: "Facebook", type: "text", placeholder: "名字或链接", helperText: "请输入名字、主页链接或 Facebook ID" },
+      { type: "sectionBreak", label: "个性类型 Personality Profile" },
       {
         id: "discType",
         number: 14,
         label: "DISC 类型 DISC Type",
         type: "select",
+        helperText: "如不确定可先留空 / Leave blank if unsure",
         options: ["", "D", "I", "S", "C", "DI", "DS", "DC", "ID", "IS", "IC", "SD", "SI", "SC", "CD", "CI", "CS"],
       },
       {
@@ -271,11 +315,23 @@ const sections: SectionConfig[] = [
         number: 15,
         label: "MBTI 类型 MBTI Type",
         type: "select",
+        helperText: "如不确定可先留空 / Leave blank if unsure",
         options: ["", "ISTJ", "ISFJ", "INFJ", "INTJ", "ISTP", "ISFP", "INFP", "INTP", "ESTP", "ESFP", "ENFP", "ENTP", "ESTJ", "ESFJ", "ENFJ", "ENTJ"],
       },
-      { id: "emergencyName", number: 16, label: "紧急联系人姓名 Emergency Contact Name", type: "text", required: true },
-      { id: "emergencyRelationship", number: 17, label: "关系 Relationship", type: "text" },
-      { id: "emergencyPhone", number: 18, label: "紧急联系电话 Emergency Phone", type: "tel", required: true },
+      { type: "sectionBreak", label: "紧急联系人 Emergency Contact" },
+      { id: "emergencyName", number: 16, label: "紧急联系人姓名 Emergency Contact Name", type: "text", required: true, placeholder: "例如：陈先生" },
+      { id: "emergencyRelationship", number: 17, label: "关系 Relationship", type: "text", placeholder: "父母 / 伴侣 / 朋友" },
+      {
+        id: "emergencyPhone",
+        number: 18,
+        label: "紧急联系电话 Emergency Phone",
+        type: "tel",
+        required: true,
+        placeholder: "012-345 6789",
+        helperText: "请输入马来西亚手机号，例如 012-345 6789 或 +60 12-345 6789",
+        validationMessage: "紧急联系电话格式需为马来西亚手机号",
+        autoFormat: "phone",
+      },
     ],
   },
   {
@@ -410,8 +466,8 @@ const sections: SectionConfig[] = [
     fields: [
       { id: "finalAgreement", number: 61, label: "我同意以上内容 / I agree to the above content", type: "checkbox", required: true },
       { id: "hasFinalNotes", detailId: "finalNotes", number: 62, label: "我有意见/备注 / I have comments or notes", type: "checkbox" },
-      { id: "finalName", number: 63, label: "姓名 Final Name", type: "text", required: true },
-      { id: "dateSigned", number: 65, label: "签署日期 Date Signed", type: "date", required: true },
+      { id: "finalName", number: 63, label: "姓名 Final Name", type: "text", required: true, placeholder: "请填写全名", helperText: "请填写与个人资料一致的全名" },
+      { id: "dateSigned", number: 65, label: "签署日期 Date Signed", type: "date", required: true, maxDate: "today" },
       { id: "startDate", number: 66, label: "入职日期 Start Date", type: "date", required: true },
     ],
   },
@@ -424,6 +480,127 @@ const formPath = "/form/culture-agreement";
 
 const summarizeArrays = (...values: string[][]) =>
   values.filter((value) => value.length).map((value) => value.join(", ")).join(" | ");
+
+const todayISO = () => new Date().toISOString().slice(0, 10);
+
+const normalizeICNumber = (value: string) => {
+  const digits = value.replace(/\D/g, "").slice(0, 12);
+  if (digits.length !== 12) return value.trim();
+  return `${digits.slice(0, 6)}-${digits.slice(6, 8)}-${digits.slice(8)}`;
+};
+
+const isValidICNumber = (value: string) => value.replace(/\D/g, "").length === 12;
+
+const normalizeMYPhone = (value: string) => {
+  const compact = value.replace(/[^\d+]/g, "");
+  const digits = compact.replace(/\D/g, "");
+  const local = compact.startsWith("+60")
+    ? `0${digits.slice(2)}`
+    : digits.startsWith("60")
+      ? `0${digits.slice(2)}`
+      : digits;
+
+  if (!/^01\d{8,9}$/.test(local)) return value.trim();
+  return `${local.slice(0, 3)}-${local.slice(3, 6)} ${local.slice(6)}`;
+};
+
+const isValidMYPhone = (value: string) => {
+  const compact = value.replace(/[^\d+]/g, "");
+  const digits = compact.replace(/\D/g, "");
+  const local = compact.startsWith("+60")
+    ? `0${digits.slice(2)}`
+    : digits.startsWith("60")
+      ? `0${digits.slice(2)}`
+      : digits;
+  return /^01\d{8,9}$/.test(local);
+};
+
+const isValidEmail = (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
+
+const normalizeSocialHandle = (value: string) => {
+  const trimmed = value.trim();
+  if (!trimmed || trimmed.startsWith("@") || /^https?:\/\//i.test(trimmed)) return trimmed;
+  return `@${trimmed}`;
+};
+
+const fieldLabel = (field: FieldConfig) =>
+  field.number ? `${field.number}. ${field.label}` : field.label;
+
+const isInputField = (field: FieldConfig): field is FieldConfig & { id: keyof FormData } =>
+  Boolean(field.id) && field.type !== "sectionBreak";
+
+const visibleValidationFields = sections.flatMap((section) =>
+  section.fields.filter(isInputField).map((field) => ({ section, field })),
+);
+
+const autoFormatValue = (field: FieldConfig, value: FormValue) => {
+  if (typeof value !== "string") return value;
+  if (field.autoFormat === "ic") return normalizeICNumber(value);
+  if (field.autoFormat === "phone") return normalizeMYPhone(value);
+  if (field.autoFormat === "social") return normalizeSocialHandle(value);
+  return value.trim();
+};
+
+const validateFieldValue = (form: FormData, field: FieldConfig) => {
+  if (!isInputField(field)) return "";
+  const value = form[field.id];
+  const stringValue = typeof value === "string" ? value.trim() : "";
+
+  if (field.required) {
+    if (typeof value === "boolean" && !value) return "此项必须确认 / This confirmation is required";
+    if (Array.isArray(value) && value.length === 0) return "请选择一项 / Please select an option";
+    if (typeof value === "string" && !stringValue) return "此项必填 / This field is required";
+  }
+
+  if (!stringValue) return "";
+
+  if (field.id === "icNumber" && !isValidICNumber(stringValue)) {
+    return field.validationMessage || "IC 格式不正确";
+  }
+
+  if ((field.id === "phone" || field.id === "emergencyPhone") && !isValidMYPhone(stringValue)) {
+    return field.validationMessage || "电话格式不正确";
+  }
+
+  if (field.id === "email" && !isValidEmail(stringValue)) {
+    return "Email 格式不正确，例如 name@email.com";
+  }
+
+  if (field.id === "age") {
+    const age = Number(stringValue);
+    if (!Number.isInteger(age) || age < 15 || age > 80) {
+      return "年龄请输入 15-80 之间的数字";
+    }
+  }
+
+  if ((field.id === "dob" || field.id === "dateSigned") && stringValue > todayISO()) {
+    return "日期不能是未来日期 / Date cannot be in the future";
+  }
+
+  return "";
+};
+
+const getValidationIssues = (form: FormData, signature: string): ValidationIssue[] => {
+  const issues = visibleValidationFields
+    .map(({ section, field }) => ({
+      id: field.id,
+      section: `${section.title} / ${section.subtitle}`,
+      label: fieldLabel(field),
+      message: validateFieldValue(form, field),
+    }))
+    .filter((issue): issue is ValidationIssue => Boolean(issue.message));
+
+  if (!signature) {
+    issues.push({
+      id: "signature",
+      section: "最终确认与签名 / Final Confirmation And Signature",
+      label: "64. 签名 / Signature",
+      message: "请用手指或鼠标签名 / Please sign in the signature pad",
+    });
+  }
+
+  return issues;
+};
 
 function App() {
   const [path, setPath] = useState(window.location.pathname);
@@ -689,6 +866,8 @@ function CultureAgreementForm() {
   const [message, setMessage] = useState("");
   const [activeSection, setActiveSection] = useState("personal");
   const [scrollProgress, setScrollProgress] = useState(0);
+  const [touchedFields, setTouchedFields] = useState<Set<keyof FormData>>(new Set());
+  const [submitAttempted, setSubmitAttempted] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   useEffect(() => {
@@ -711,31 +890,30 @@ function CultureAgreementForm() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  const missingRequiredFields = useMemo(() => {
-    const required = [
-      { section: "个人资料 / Personal", label: "1. 中文姓名 / Chinese Name", missing: !form.nameCN.trim() },
-      { section: "个人资料 / Personal", label: "2. 英文姓名 / English Name", missing: !form.nameEN.trim() },
-      { section: "个人资料 / Personal", label: "5. 身份证号码 / IC Number", missing: !form.icNumber.trim() },
-      { section: "个人资料 / Personal", label: "6. 出生日期 / Date of Birth", missing: !form.dob },
-      { section: "个人资料 / Personal", label: "7. 电话号码 / Phone", missing: !form.phone.trim() },
-      { section: "个人资料 / Personal", label: "8. Email", missing: !form.email.trim() },
-      { section: "个人资料 / Personal", label: "16. 紧急联系人姓名 / Emergency Contact Name", missing: !form.emergencyName.trim() },
-      { section: "个人资料 / Personal", label: "18. 紧急联系电话 / Emergency Phone", missing: !form.emergencyPhone.trim() },
-      { section: "技术能力 / Technical", label: "29. 整体技术程度 / Overall Technical Level", missing: !form.technicalLevel },
-      { section: "最终确认 / Final", label: "61. 我同意以上内容 / I agree to the above content", missing: !form.finalAgreement },
-      { section: "最终确认 / Final", label: "63. 姓名 / Final Name", missing: !form.finalName.trim() },
-      { section: "最终确认 / Final", label: "64. 签名 / Signature", missing: !signature },
-      { section: "最终确认 / Final", label: "65. 签署日期 / Date Signed", missing: !form.dateSigned },
-      { section: "最终确认 / Final", label: "66. 入职日期 / Start Date", missing: !form.startDate },
-    ];
-
-    return required.filter((item) => item.missing);
-  }, [form, signature]);
-
-  const isReady = missingRequiredFields.length === 0;
+  const validationIssues = useMemo(() => getValidationIssues(form, signature), [form, signature]);
+  const isReady = validationIssues.length === 0;
 
   const update = (name: keyof FormData, value: FormValue) => {
     setForm((current) => ({ ...current, [name]: value }));
+  };
+
+  const touchField = (name: keyof FormData) => {
+    setTouchedFields((current) => new Set(current).add(name));
+  };
+
+  const formatField = (field: FieldConfig) => {
+    if (!isInputField(field)) return;
+    setForm((current) => ({
+      ...current,
+      [field.id]: autoFormatValue(field, current[field.id]),
+    }));
+    touchField(field.id);
+  };
+
+  const fieldError = (field: FieldConfig) => {
+    if (!isInputField(field)) return "";
+    if (!submitAttempted && !touchedFields.has(field.id)) return "";
+    return validateFieldValue(form, field);
   };
 
   const toggleArrayValue = (name: keyof FormData, value: string) => {
@@ -798,46 +976,55 @@ function CultureAgreementForm() {
   };
 
   const payload = () => {
+    const normalizedForm: FormData = {
+      ...form,
+      icNumber: normalizeICNumber(form.icNumber),
+      phone: normalizeMYPhone(form.phone),
+      emergencyPhone: normalizeMYPhone(form.emergencyPhone),
+      instagram: normalizeSocialHandle(form.instagram),
+      tiktok: normalizeSocialHandle(form.tiktok),
+      xiaohongshu: normalizeSocialHandle(form.xiaohongshu),
+    };
     const salonExperience = summarizeArrays(
-      form.haircutSkills,
-      form.coloringSkills,
-      form.permStraightSkills,
-      form.extensionHairpieceSkills,
-      form.scalpCareSkills,
+      normalizedForm.haircutSkills,
+      normalizedForm.coloringSkills,
+      normalizedForm.permStraightSkills,
+      normalizedForm.extensionHairpieceSkills,
+      normalizedForm.scalpCareSkills,
     );
 
     return {
-      employee_name: form.nameEN || form.nameCN,
-      preferred_name: form.nickname || null,
-      email: form.email,
-      phone: form.phone,
-      date_of_birth: form.dob || null,
-      address: form.homeAddress || null,
-      emergency_contact_name: form.emergencyName,
-      emergency_contact_phone: form.emergencyPhone,
-      role_applied_for: form.technicalLevel || "Diva Team Member",
+      employee_name: normalizedForm.nameEN || normalizedForm.nameCN,
+      preferred_name: normalizedForm.nickname || null,
+      email: normalizedForm.email,
+      phone: normalizedForm.phone,
+      date_of_birth: normalizedForm.dob || null,
+      address: normalizedForm.homeAddress || null,
+      emergency_contact_name: normalizedForm.emergencyName,
+      emergency_contact_phone: normalizedForm.emergencyPhone,
+      role_applied_for: normalizedForm.technicalLevel || "Diva Team Member",
       employment_type: "Onboarding",
-      start_date: form.startDate || null,
+      start_date: normalizedForm.startDate || null,
       schedule_availability: null,
       salon_experience: salonExperience || null,
       certifications: null,
       strengths: summarizeArrays(
-        form.contentCreation,
-        form.softwareSkills,
-        form.socialMediaSkills,
-        form.businessSkills,
-        form.aiSystemSkills,
+        normalizedForm.contentCreation,
+        normalizedForm.softwareSkills,
+        normalizedForm.socialMediaSkills,
+        normalizedForm.businessSkills,
+        normalizedForm.aiSystemSkills,
       ) || null,
-      growth_goals: form.cultureNotes || form.serviceNotes || null,
+      growth_goals: normalizedForm.cultureNotes || normalizedForm.serviceNotes || null,
       uniform_size: null,
-      payroll_name: form.finalName || form.nameEN || form.nameCN,
+      payroll_name: normalizedForm.finalName || normalizedForm.nameEN || normalizedForm.nameCN,
       bank_name: null,
       bank_account_last4: null,
       tax_id_last4: null,
-      policies_acknowledged: form.finalAgreement,
+      policies_acknowledged: normalizedForm.finalAgreement,
       signature_data_url: signature || null,
       form_payload: {
-        ...form,
+        ...normalizedForm,
         department,
         departmentName: "HR Department",
         formSlug,
@@ -852,12 +1039,14 @@ function CultureAgreementForm() {
   const submit = async (event: React.FormEvent) => {
     event.preventDefault();
     setMessage("");
+    setSubmitAttempted(true);
+    setTouchedFields(new Set(visibleValidationFields.map(({ field }) => field.id)));
 
     if (!isReady) {
       setStatus("error");
       setMessage(
-        `请完成以下必填项目 / Please complete these required fields:\n${missingRequiredFields
-          .map((field) => `- ${field.section}: ${field.label}`)
+        `请完成或修正以下项目 / Please complete or fix these fields:\n${validationIssues
+          .map((field) => `- ${field.section}: ${field.label} — ${field.message}`)
           .join("\n")}`,
       );
       return;
@@ -930,6 +1119,8 @@ function CultureAgreementForm() {
         <form className="form" onSubmit={submit} noValidate>
           {sections.map((section) => (
             <Section {...section} key={section.id}>
+              <SectionContent sectionId={section.id} />
+
               {section.id === "final" && (
                 <div className="quoteBlock">
                   “我理解 Diva Hair Lounge 建立在技术、纪律、服务与团队精神之上。”
@@ -944,8 +1135,10 @@ function CultureAgreementForm() {
                 <Field
                   field={field}
                   form={form}
-                  key={String(field.id)}
+                  error={fieldError(field)}
+                  key={`${field.type}-${String(field.id || field.label)}`}
                   onChange={update}
+                  onFieldBlur={formatField}
                   onToggleArray={toggleArrayValue}
                 />
               ))}
@@ -953,7 +1146,10 @@ function CultureAgreementForm() {
               {section.id === "final" && (
                 <div className="signatureBox">
                   <div className="signatureHeader">
-                    <span>64. 签名 Signature</span>
+                    <span>
+                      64. 签名 Signature
+                      <small>请用手指或鼠标签名</small>
+                    </span>
                     <button type="button" className="iconButton" onClick={clearSignature}>
                       <Eraser size={16} />
                       清除 Clear
@@ -969,6 +1165,9 @@ function CultureAgreementForm() {
                     onPointerLeave={endSignature}
                     aria-label="Digital signature pad"
                   />
+                  {submitAttempted && !signature && (
+                    <p className="fieldError">请用手指或鼠标签名 / Please sign in the signature pad</p>
+                  )}
                 </div>
               )}
             </Section>
@@ -991,10 +1190,10 @@ function CultureAgreementForm() {
             <div className="message hint">
               <strong>尚未完成 / Not ready yet</strong>
               <span>
-                还差 {missingRequiredFields.length} 个必填项目。点击 Submit 会显示完整清单。
+                还差 {validationIssues.length} 个必填或格式项目。点击 Submit 会显示完整清单。
                 {" "}
-                {missingRequiredFields.length} required item
-                {missingRequiredFields.length === 1 ? "" : "s"} remaining.
+                {validationIssues.length} required or format item
+                {validationIssues.length === 1 ? "" : "s"} remaining.
               </span>
             </div>
           )}
@@ -1421,6 +1620,100 @@ function formatAdminValue(value: unknown) {
   return value ? String(value) : "-";
 }
 
+function SectionContent({ sectionId }: { sectionId: string }) {
+  if (sectionId === "culture") {
+    return (
+      <>
+        <div className="quoteBlock">
+          “认真对待每一根头发，也认真对待每一个人。”
+        </div>
+        <div className="contentBlock">
+          <p>Diva 不只是一个工作的地方。我们更重视成长、创意、服务、团队精神与彼此成就。</p>
+          <div className="valuePills">
+            <span>创新 Innovation</span>
+            <span>融合与互相协助 Team Support</span>
+            <span>正面能量 Positive Energy</span>
+          </div>
+        </div>
+      </>
+    );
+  }
+
+  if (sectionId === "service") {
+    return (
+      <div className="contentBlock">
+        <p>我们始终把客户体验放在第一位。每一次服务都代表品牌形象。</p>
+        <p><strong>Diva <span className="dangerText">不接受</span>：</strong>情绪化服务、摆脸色、争吵、翻白眼、不尊重客户、欺骗客户或强硬推销行为。</p>
+        <p><strong>Diva 希望：</strong>每位客户离开时，无论状态、情绪、体验与感觉，都比进来时更舒服、更自信。</p>
+      </div>
+    );
+  }
+
+  if (sectionId === "front") {
+    return (
+      <div className="contentBlock">
+        <p>我们相信，一个有温度与活力的空间，会让客户更愿意走进来。</p>
+        <ul className="policyList compact">
+          <li>保持前区整洁</li>
+          <li>主动迎宾</li>
+          <li>空档时保持专业状态</li>
+        </ul>
+      </div>
+    );
+  }
+
+  if (sectionId === "teamwork") {
+    return (
+      <div className="contentBlock">
+        <p>Diva 重视团队精神。我们 <span className="dangerText">不鼓励</span> 小圈子文化、抢客、恶意竞争、影响团队关系或干扰其他发型师客户。</p>
+        <p>每位团队成员都有责任维持环境整洁、工具完整、主动协助团队并照顾整体空间体验。</p>
+      </div>
+    );
+  }
+
+  if (sectionId === "rules") {
+    return (
+      <div className="contentBlock">
+        <p>本人理解并同意遵守公司制度、营业安排、资料保密与日常管理要求。</p>
+        <ul className="policyList">
+          <li>不私下带走公司工具、产品或客户资料</li>
+          <li>不私下邀约公司客户进行个人服务</li>
+          <li>不泄露公司内部资料、价格与运营方式</li>
+          <li>未经同意不赠送公司产品与服务</li>
+          <li>愿意配合库存与日常管理工作</li>
+          <li>愿意协助公司内容拍摄与品牌推广</li>
+          <li>愿意配合 Google Review 邀请流程</li>
+          <li>遵守公司营业时间与安排</li>
+        </ul>
+        <div className="noticeBox">
+          <p><strong>营业时间：</strong>10:30AM - 8:30PM</p>
+          <p><strong>固定休息：</strong>每逢星期一 Every Monday</p>
+          <p><strong>农历新年前高峰期：</strong>需配合公司特别安排</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (sectionId === "media") {
+    return (
+      <div className="contentBlock">
+        <p>本人同意 Diva Hair Lounge 在合理范围内使用本人工作相关内容，包括照片、视频、作品过程、服务成果、社交媒体内容、广告宣传、品牌内容、教育培训与作品展示。</p>
+        <p>相关素材仅用于合理品牌、教育、宣传与作品展示用途。</p>
+      </div>
+    );
+  }
+
+  if (sectionId === "final") {
+    return (
+      <div className="contentBlock finalSummary">
+        <p>本人确认已理解并愿意遵守 Diva Hair Lounge 的文化、服务标准、团队规则、工作流程、媒体授权与签名确认要求。</p>
+      </div>
+    );
+  }
+
+  return null;
+}
+
 function Section({
   id,
   number,
@@ -1451,16 +1744,43 @@ function Section({
 function Field({
   field,
   form,
+  error,
   onChange,
+  onFieldBlur,
   onToggleArray,
 }: {
   field: FieldConfig;
   form: FormData;
+  error: string;
   onChange: (name: keyof FormData, value: FormValue) => void;
+  onFieldBlur: (field: FieldConfig) => void;
   onToggleArray: (name: keyof FormData, value: string) => void;
 }) {
+  if (field.type === "sectionBreak") {
+    return (
+      <div className="sectionBreak">
+        <span>{field.label}</span>
+      </div>
+    );
+  }
+
+  if (!isInputField(field)) return null;
+
   const value = form[field.id];
-  const label = `${field.number}. ${field.label}`;
+  const label = fieldLabel(field);
+  const helper = field.helperText && <p className="fieldHelp">{field.helperText}</p>;
+  const errorText = error && <p className="fieldError">{error}</p>;
+  const updateTextValue = (nextValue: string) => {
+    if (field.autoFormat === "ic" && isValidICNumber(nextValue)) {
+      onChange(field.id, normalizeICNumber(nextValue));
+      return;
+    }
+    if (field.autoFormat === "phone" && isValidMYPhone(nextValue)) {
+      onChange(field.id, normalizeMYPhone(nextValue));
+      return;
+    }
+    onChange(field.id, nextValue);
+  };
 
   if (field.type === "textarea") {
     return (
@@ -1469,9 +1789,12 @@ function Field({
         <textarea
           value={String(value)}
           onChange={(event) => onChange(field.id, event.target.value)}
+          onBlur={() => onFieldBlur(field)}
           placeholder={field.placeholder}
           rows={4}
         />
+        {helper}
+        {errorText}
       </label>
     );
   }
@@ -1483,6 +1806,7 @@ function Field({
         <select
           value={String(value)}
           onChange={(event) => onChange(field.id, event.target.value)}
+          onBlur={() => onFieldBlur(field)}
           required={field.required}
         >
           {field.options?.map((option) => (
@@ -1491,6 +1815,8 @@ function Field({
             </option>
           ))}
         </select>
+        {helper}
+        {errorText}
       </label>
     );
   }
@@ -1502,7 +1828,10 @@ function Field({
           <input
             type="checkbox"
             checked={Boolean(value)}
-            onChange={(event) => onChange(field.id, event.target.checked)}
+            onChange={(event) => {
+              onChange(field.id, event.target.checked);
+              onFieldBlur(field);
+            }}
             required={field.required}
           />
           <span>
@@ -1510,6 +1839,8 @@ function Field({
             {field.required && <em>*</em>}
           </span>
         </label>
+        {helper}
+        {errorText}
         {field.detailId && Boolean(value) && (
           <label className="field wide detailField">
             <span>62. 意见/备注 Comments / Notes</span>
@@ -1540,17 +1871,22 @@ function Field({
                     ? selected.includes(option)
                     : value === option
                 }
-                onChange={() =>
-                  field.type === "checkboxGroup"
-                    ? onToggleArray(field.id, option)
-                    : onChange(field.id, option)
-                }
+                onChange={() => {
+                  if (field.type === "checkboxGroup") {
+                    onToggleArray(field.id, option);
+                  } else {
+                    onChange(field.id, option);
+                  }
+                  onFieldBlur(field);
+                }}
                 required={field.required && field.type === "radioGroup"}
               />
               <span>{option}</span>
             </label>
           ))}
         </div>
+        {helper}
+        {errorText}
       </fieldset>
     );
   }
@@ -1566,7 +1902,10 @@ function Field({
                 type="radio"
                 name={String(field.id)}
                 checked={value === option}
-                onChange={() => onChange(field.id, option)}
+                onChange={() => {
+                  onChange(field.id, option);
+                  onFieldBlur(field);
+                }}
               />
               <span>{option}</span>
             </label>
@@ -1581,6 +1920,8 @@ function Field({
             rows={3}
           />
         )}
+        {helper}
+        {errorText}
       </fieldset>
     );
   }
@@ -1590,8 +1931,9 @@ function Field({
       <span>{label}{field.required && <em>*</em>}</span>
       <input
         value={String(value)}
-        onChange={(event) => onChange(field.id, event.target.value)}
-        type={field.type === "email" ? "text" : field.type}
+        onChange={(event) => updateTextValue(event.target.value)}
+        onBlur={() => onFieldBlur(field)}
+        type={field.type}
         inputMode={
           field.type === "email"
             ? "email"
@@ -1603,7 +1945,12 @@ function Field({
         }
         required={field.required}
         placeholder={field.placeholder}
+        max={field.maxDate === "today" ? todayISO() : field.max}
+        maxLength={field.maxLength}
+        min={field.min}
       />
+      {helper}
+      {errorText}
     </label>
   );
 }

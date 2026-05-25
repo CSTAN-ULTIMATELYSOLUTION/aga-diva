@@ -1388,10 +1388,12 @@ h1 em {
 
 .field.wide,
 .quoteBlock,
+.contentBlock,
 .checkRow,
 .choiceBlock,
 .signatureBox,
-.detailField {
+.detailField,
+.sectionBreak {
   grid-column: 1 / -1;
 }
 
@@ -1404,6 +1406,44 @@ h1 em {
   font-weight: 400;
   letter-spacing: 2px;
   text-transform: uppercase;
+}
+
+.sectionBreak {
+  margin: 8px 0 0;
+  padding-top: 22px;
+  border-top: 1px solid var(--border);
+}
+
+.sectionBreak:first-child {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: 0;
+}
+
+.sectionBreak span {
+  display: inline-flex;
+  color: var(--gold);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 5px;
+  text-transform: uppercase;
+}
+
+.fieldHelp,
+.fieldError {
+  margin: -2px 0 0;
+  font-size: 12px;
+  line-height: 1.55;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.fieldHelp {
+  color: var(--text-faint);
+}
+
+.fieldError {
+  color: #f1a0a0;
 }
 
 .field span em,
@@ -1475,6 +1515,95 @@ textarea:focus {
   font-size: 12px;
   font-style: normal;
   letter-spacing: 0.8px;
+}
+
+.contentBlock {
+  display: grid;
+  gap: 18px;
+  color: var(--text-dim);
+  font-size: 16px;
+  line-height: 1.9;
+}
+
+.contentBlock p {
+  margin: 0;
+}
+
+.contentBlock strong {
+  color: var(--gold-light);
+  font-weight: 500;
+}
+
+.dangerText {
+  color: var(--red);
+  font-weight: 500;
+}
+
+.valuePills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.valuePills span {
+  border: 1px solid rgba(201, 169, 110, 0.26);
+  border-radius: 999px;
+  padding: 8px 12px;
+  color: var(--gold-light);
+  background: rgba(201, 169, 110, 0.06);
+  font-size: 12px;
+  letter-spacing: 1px;
+}
+
+.policyList {
+  display: grid;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.policyList li {
+  position: relative;
+  padding: 13px 0 13px 30px;
+  border-bottom: 1px solid var(--border);
+}
+
+.policyList li::before {
+  content: "-";
+  position: absolute;
+  left: 0;
+  color: var(--gold);
+}
+
+.policyList.compact {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.policyList.compact li {
+  border: 1px solid rgba(201, 169, 110, 0.18);
+  border-radius: 10px;
+  padding: 12px 14px 12px 32px;
+  background: rgba(10, 10, 10, 0.42);
+}
+
+.policyList.compact li::before {
+  left: 14px;
+}
+
+.noticeBox {
+  display: grid;
+  gap: 8px;
+  border: 1px solid var(--border-gold);
+  border-radius: 12px;
+  padding: 18px 20px;
+  color: var(--text-dim);
+  background: #0a0700;
+}
+
+.finalSummary {
+  text-align: center;
 }
 
 .checkRow {
@@ -1578,6 +1707,19 @@ textarea:focus {
   justify-content: space-between;
   padding: 14px 16px;
   border-bottom: 1px solid var(--border-gold);
+}
+
+.signatureHeader span {
+  display: grid;
+  gap: 4px;
+}
+
+.signatureHeader small {
+  color: var(--text-faint);
+  font-size: 11px;
+  font-weight: 300;
+  letter-spacing: 0;
+  text-transform: none;
 }
 
 canvas {
@@ -1722,6 +1864,10 @@ button:disabled {
 
   .choiceGrid,
   .yesNoGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .policyList.compact {
     grid-template-columns: 1fr;
   }
 
