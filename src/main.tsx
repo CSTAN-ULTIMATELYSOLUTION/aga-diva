@@ -383,7 +383,7 @@ const sections: SectionConfig[] = [
     subtitle: "Additional Skills",
     fields: [
       { id: "contentCreation", detailId: "contentCreationOther", number: 30, label: "内容创作 Content Creation", type: "checkboxGroup", options: ["拍摄 Shooting", "Reels/Story 创作", "剪片 Video Editing", "文案 Copywriting", otherOption], detailPlaceholder: "请填写其他内容创作能力" },
-      { id: "softwareSkills", detailId: "softwareSkillsOther", number: 31, label: "软件技能 Software Skills", type: "checkboxGroup", options: ["Canva", "剪映 CapCut", "Photoshop", "Illustrator", "Lightroom", otherOption], detailPlaceholder: "请填写其他软件技能" },
+      { id: "softwareSkills", detailId: "softwareSkillsOther", number: 31, label: "软件技能 Software Skills", type: "checkboxGroup", options: ["Canva", "剪映 CapCut", "Photoshop", "Illustrator", "AI 创作工具", otherOption], detailPlaceholder: "请填写其他软件技能" },
       { id: "socialMediaSkills", detailId: "socialMediaSkillsOther", number: 32, label: "社交媒体 Social Media", type: "checkboxGroup", options: ["IG", "TikTok", "小红书 Xiaohongshu", "FB Marketing", otherOption], detailPlaceholder: "请填写其他社交媒体能力" },
       { id: "businessSkills", detailId: "businessSkillsOther", number: 33, label: "商业能力 Business Skills", type: "checkboxGroup", options: ["销售 Sales", "客户沟通 Client Communication", "团队合作 Teamwork", "管理 Management", "活动策划 Event Planning", "品牌意识 Brand Awareness", otherOption], detailPlaceholder: "请填写其他商业能力" },
       { id: "aiSystemSkills", detailId: "aiSystemSkillsOther", number: 34, label: "AI/系统能力 AI / System Skills", type: "checkboxGroup", options: ["ChatGPT", "AI Design", "AI Content", "系统管理 System Management", otherOption], detailPlaceholder: "请填写其他 AI 或系统能力" },
