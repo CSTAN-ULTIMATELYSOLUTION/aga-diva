@@ -370,7 +370,7 @@ const sections: SectionConfig[] = [
     title: "额外能力",
     subtitle: "Additional Skills",
     fields: [
-      { id: "contentCreation", number: 30, label: "内容创作 Content Creation", type: "checkboxGroup", options: ["拍摄 Shooting", "Reels·TikTok", "剪片 Video Editing", "文案 Copywriting"] },
+      { id: "contentCreation", number: 30, label: "内容创作 Content Creation", type: "checkboxGroup", options: ["拍摄 Shooting", "Reels/Story 创作", "剪片 Video Editing", "文案 Copywriting"] },
       { id: "softwareSkills", number: 31, label: "软件技能 Software Skills", type: "checkboxGroup", options: ["Canva", "剪映 CapCut", "Photoshop", "Illustrator", "Lightroom"] },
       { id: "socialMediaSkills", number: 32, label: "社交媒体 Social Media", type: "checkboxGroup", options: ["IG", "TikTok", "小红书 Xiaohongshu", "FB Marketing"] },
       { id: "businessSkills", number: 33, label: "商业能力 Business Skills", type: "checkboxGroup", options: ["销售 Sales", "客户沟通 Client Communication", "团队合作 Teamwork", "管理 Management", "活动策划 Event Planning", "品牌意识 Brand Awareness"] },
@@ -382,7 +382,7 @@ const sections: SectionConfig[] = [
     number: "⑤",
     nav: "文化 Culture",
     title: "Diva 公司文化",
-    subtitle: "Diva Company Culture",
+    subtitle: "Diva Culture",
     fields: [
       { id: "cultureRead", number: 35, label: "我已阅读并理解 Diva 公司文化 / I have read and understood Diva company culture", type: "checkbox" },
       { id: "cultureRespect", number: 36, label: "我愿意尊重团队与品牌价值 / I am willing to respect team and brand values", type: "checkbox" },
@@ -1629,11 +1629,7 @@ function SectionContent({ sectionId }: { sectionId: string }) {
         </div>
         <div className="contentBlock">
           <p>Diva 不只是一个工作的地方。我们更重视成长、创意、服务、团队精神与彼此成就。</p>
-          <div className="valuePills">
-            <span>创新 Innovation</span>
-            <span>融合与互相协助 Team Support</span>
-            <span>正面能量 Positive Energy</span>
-          </div>
+          <p>Diva 是一家注重 <strong>创新、融合、互相协助、正面能量、服务体验与团队精神</strong> 的品牌。每一位团队成员，都代表着 Diva 的形象与文化。</p>
         </div>
       </>
     );
