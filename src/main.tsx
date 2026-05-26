@@ -13,7 +13,6 @@ import {
   Search,
   Send,
   ShieldCheck,
-  Sparkles,
   Users,
 } from "lucide-react";
 import "./styles.css";
@@ -143,12 +142,16 @@ type SectionConfig = {
   fields: FieldConfig[];
 };
 
-type SubmissionPayload = Partial<FormData> & {
+type SubmissionPayload = {
+  [key: string]: unknown;
   department?: string;
   departmentName?: string;
+  emailReportHtml?: string;
+  emailReportText?: string;
   formSlug?: string;
   formName?: string;
   signatureCaptured?: boolean;
+  submittedSectionCount?: number;
   submittedFieldCount?: number;
 };
 
@@ -383,7 +386,7 @@ const sections: SectionConfig[] = [
     subtitle: "Additional Skills",
     fields: [
       { id: "contentCreation", detailId: "contentCreationOther", number: 30, label: "内容创作 Content Creation", type: "checkboxGroup", options: ["拍摄 Shooting", "Reels/Story 创作", "剪片 Video Editing", "文案 Copywriting", otherOption], detailPlaceholder: "请填写其他内容创作能力" },
-      { id: "softwareSkills", detailId: "softwareSkillsOther", number: 31, label: "软件技能 Software Skills", type: "checkboxGroup", options: ["Canva", "剪映 CapCut", "Photoshop", "Illustrator", "AI 创作工具", otherOption], detailPlaceholder: "请填写其他软件技能" },
+      { id: "softwareSkills", detailId: "softwareSkillsOther", number: 31, label: "软件技能 Software Skills", type: "checkboxGroup", options: ["Canva", "剪映 CapCut", "Photoshop", "Illustrator", "AI创作工具", otherOption], detailPlaceholder: "请填写其他软件技能" },
       { id: "socialMediaSkills", detailId: "socialMediaSkillsOther", number: 32, label: "专业经营社交媒体 Professional Social Media Management", type: "checkboxGroup", options: ["IG", "TikTok", "小红书 Xiaohongshu", "FB Marketing", otherOption], detailPlaceholder: "请填写其他社交媒体能力" },
       { id: "businessSkills", detailId: "businessSkillsOther", number: 33, label: "商业能力 Business Skills", type: "checkboxGroup", options: ["销售 Sales", "客户沟通 Client Communication", "团队合作 Teamwork", "管理 Management", "活动策划 Event Planning", "品牌意识 Brand Awareness", otherOption], detailPlaceholder: "请填写其他商业能力" },
       { id: "aiSystemSkills", detailId: "aiSystemSkillsOther", number: 34, label: "AI/系统能力 AI / System Skills", type: "checkboxGroup", options: ["制作图片", "文案创作", "影片创作", "AI Agent", "自动化流程", "AI人创作", "系统管理", otherOption], detailPlaceholder: "请填写其他 AI 或系统能力" },
@@ -479,7 +482,7 @@ const sections: SectionConfig[] = [
       { id: "finalAgreement", number: 61, label: "我同意以上内容 / I agree to the above content", type: "checkbox", required: true },
       { id: "hasFinalNotes", detailId: "finalNotes", number: 62, label: "我有意见/备注 / I have comments or notes", type: "checkbox" },
       { id: "finalName", number: 63, label: "姓名 Final Name", type: "text", required: true, placeholder: "请填写全名", helperText: "请填写与个人资料一致的全名" },
-      { id: "dateSigned", number: 65, label: "签署日期 Date Signed", type: "date", required: true, maxDate: "today" },
+      { id: "dateSigned", number: 65, label: "签署日期 Date Signed", type: "date", required: true },
       { id: "startDate", number: 66, label: "入职日期 Start Date", type: "date", required: true },
     ],
   },
@@ -495,6 +498,20 @@ const summarizeArrays = (...values: string[][]) =>
 
 const withOtherAnswer = (values: string[], other: string, label: string) =>
   other.trim() ? [...values, `${label}: ${other.trim()}`] : values;
+
+const escapeHtml = (value: unknown) =>
+  String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+
+const reportValue = (value: FormValue | string | null | undefined) => {
+  if (Array.isArray(value)) return value.length ? value.join(", ") : "-";
+  if (typeof value === "boolean") return value ? "Yes" : "No";
+  return value ? String(value) : "-";
+};
 
 const todayISO = () => new Date().toISOString().slice(0, 10);
 
@@ -598,7 +615,7 @@ const validateFieldValue = (form: FormData, field: FieldConfig) => {
     }
   }
 
-  if ((field.id === "dob" || field.id === "dateSigned") && stringValue > todayISO()) {
+  if (field.id === "dob" && stringValue > todayISO()) {
     return "日期不能是未来日期 / Date cannot be in the future";
   }
 
@@ -625,6 +642,120 @@ const getValidationIssues = (form: FormData, signature: string): ValidationIssue
   }
 
   return issues;
+};
+
+const reportRows = (form: FormData, salonExperience: string, strengths: string) => [
+  ["中文姓名 Chinese Name", form.nameCN],
+  ["英文姓名 English Name", form.nameEN],
+  ["昵称 Nickname", form.nickname],
+  ["IC Number", form.icNumber],
+  ["出生日期 Date of Birth", form.dob],
+  ["Phone", form.phone],
+  ["Email", form.email],
+  ["Home Address", form.homeAddress],
+  ["Instagram", form.instagram],
+  ["TikTok", form.tiktok],
+  ["小红书 Xiaohongshu", form.xiaohongshu],
+  ["Facebook", form.facebook],
+  ["DISC", form.discType],
+  ["MBTI", form.mbtiType],
+  ["Emergency Contact", `${form.emergencyName} / ${form.emergencyRelationship} / ${form.emergencyPhone}`],
+  ["Health Notes", form.healthNotes],
+  ["Technical Skills", salonExperience],
+  ["Overall Level", form.technicalLevel],
+  ["Additional Skills", strengths],
+  ["Culture Notes", form.cultureNotes],
+  ["Service Notes", form.serviceNotes],
+  ["Front Notes", form.frontNotes],
+  ["Team Notes", form.teamNotes],
+  ["Rules Notes", form.rulesNotes],
+  ["Media Notes", form.mediaNotes],
+  ["Final Notes", form.finalNotes],
+  ["Final Name", form.finalName],
+  ["Date Signed", form.dateSigned],
+  ["Start Date", form.startDate],
+];
+
+const buildEmailReportText = (form: FormData, salonExperience: string, strengths: string) =>
+  [
+    "Diva Hair Lounge Onboarding Submission",
+    `Submitted for: ${form.finalName || form.nameEN || form.nameCN}`,
+    "",
+    ...reportRows(form, salonExperience, strengths).map(([label, value]) => `${label}: ${reportValue(value)}`),
+  ].join("\n");
+
+const buildEmailReportHtml = (form: FormData, salonExperience: string, strengths: string, signature: string) => {
+  const rows = reportRows(form, salonExperience, strengths)
+    .map(
+      ([label, value]) => `
+        <tr>
+          <th>${escapeHtml(label)}</th>
+          <td>${escapeHtml(reportValue(value))}</td>
+        </tr>`,
+    )
+    .join("");
+
+  return `<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Diva Onboarding Submission</title>
+    <style>
+      body { margin: 0; padding: 32px; background: #080808; color: #f0ede5; font-family: Arial, sans-serif; }
+      .report { max-width: 860px; margin: 0 auto; border: 1px solid #2a2a2a; border-radius: 16px; overflow: hidden; background: #111; }
+      header { padding: 28px 32px; border-bottom: 1px solid #2e2010; background: linear-gradient(90deg, #130f06, #111); }
+      h1 { margin: 0; font-size: 28px; font-weight: 400; }
+      p { color: #999080; line-height: 1.6; }
+      table { width: 100%; border-collapse: collapse; }
+      th, td { padding: 14px 18px; border-bottom: 1px solid #2a2a2a; text-align: left; vertical-align: top; }
+      th { width: 32%; color: #c9a96e; font-size: 12px; letter-spacing: 1px; text-transform: uppercase; }
+      td { color: #f0ede5; }
+      .signature { padding: 20px 32px 32px; }
+      .signature img { max-width: 100%; border: 1px solid #2e2010; background: #0a0700; }
+    </style>
+  </head>
+  <body>
+    <article class="report">
+      <header>
+        <h1>Diva Hair Lounge Onboarding Submission</h1>
+        <p>${escapeHtml(form.finalName || form.nameEN || form.nameCN)} · ${escapeHtml(form.email)} · ${escapeHtml(form.phone)}</p>
+      </header>
+      <table>${rows}</table>
+      ${signature ? `<section class="signature"><p>Signature</p><img src="${escapeHtml(signature)}" alt="Signature" /></section>` : ""}
+    </article>
+  </body>
+</html>`;
+};
+
+const sendSubmissionEmail = async (submissionPayload: { email: string; employee_name: string; form_payload: SubmissionPayload | null }) => {
+  const html = submissionPayload.form_payload?.emailReportHtml;
+  const text = submissionPayload.form_payload?.emailReportText;
+
+  if (!html || !text) {
+    return { ok: false, error: "Missing email report content" };
+  }
+
+  try {
+    const response = await fetch("/api/send-onboarding-email", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        applicantEmail: submissionPayload.email,
+        employeeName: submissionPayload.employee_name,
+        html,
+        text,
+      }),
+    });
+
+    if (!response.ok) {
+      const result = await response.json().catch(() => ({}));
+      return { ok: false, error: String(result.error || response.statusText) };
+    }
+
+    return { ok: true, error: "" };
+  } catch (error) {
+    return { ok: false, error: error instanceof Error ? error.message : "Email send failed" };
+  }
 };
 
 function App() {
@@ -1017,6 +1148,15 @@ function CultureAgreementForm() {
       normalizedForm.extensionHairpieceSkills,
       normalizedForm.scalpCareSkills,
     );
+    const strengths = summarizeArrays(
+      withOtherAnswer(normalizedForm.contentCreation, normalizedForm.contentCreationOther, "内容创作其他"),
+      withOtherAnswer(normalizedForm.softwareSkills, normalizedForm.softwareSkillsOther, "软件技能其他"),
+      withOtherAnswer(normalizedForm.socialMediaSkills, normalizedForm.socialMediaSkillsOther, "社交媒体其他"),
+      withOtherAnswer(normalizedForm.businessSkills, normalizedForm.businessSkillsOther, "商业能力其他"),
+      withOtherAnswer(normalizedForm.aiSystemSkills, normalizedForm.aiSystemSkillsOther, "AI/系统能力其他"),
+    );
+    const emailReportText = buildEmailReportText(normalizedForm, salonExperience, strengths);
+    const emailReportHtml = buildEmailReportHtml(normalizedForm, salonExperience, strengths, signature);
 
     return {
       employee_name: normalizedForm.nameEN || normalizedForm.nameCN,
@@ -1033,13 +1173,7 @@ function CultureAgreementForm() {
       schedule_availability: null,
       salon_experience: salonExperience || null,
       certifications: null,
-      strengths: summarizeArrays(
-        withOtherAnswer(normalizedForm.contentCreation, normalizedForm.contentCreationOther, "内容创作其他"),
-        withOtherAnswer(normalizedForm.softwareSkills, normalizedForm.softwareSkillsOther, "软件技能其他"),
-        withOtherAnswer(normalizedForm.socialMediaSkills, normalizedForm.socialMediaSkillsOther, "社交媒体其他"),
-        withOtherAnswer(normalizedForm.businessSkills, normalizedForm.businessSkillsOther, "商业能力其他"),
-        withOtherAnswer(normalizedForm.aiSystemSkills, normalizedForm.aiSystemSkillsOther, "AI/系统能力其他"),
-      ) || null,
+      strengths: strengths || null,
       growth_goals: normalizedForm.cultureNotes || normalizedForm.serviceNotes || null,
       uniform_size: null,
       payroll_name: normalizedForm.finalName || normalizedForm.nameEN || normalizedForm.nameCN,
@@ -1052,6 +1186,8 @@ function CultureAgreementForm() {
         ...normalizedForm,
         department,
         departmentName: "HR Department",
+        emailReportHtml,
+        emailReportText,
         formSlug,
         formName,
         signatureCaptured: Boolean(signature),
@@ -1085,7 +1221,8 @@ function CultureAgreementForm() {
 
     setStatus("saving");
 
-    const { error } = await supabase.from(tableName).insert(payload());
+    const submissionPayload = payload();
+    const { error } = await supabase.from(tableName).insert(submissionPayload);
 
     if (error) {
       setStatus("error");
@@ -1093,8 +1230,16 @@ function CultureAgreementForm() {
       return;
     }
 
+    const emailResult = await sendSubmissionEmail(submissionPayload);
+
+    if (!emailResult.ok) {
+      setStatus("error");
+      setMessage(`表格已储存到 Supabase，但邮件发送失败 / Saved to Supabase, but email failed: ${emailResult.error}`);
+      return;
+    }
+
     setStatus("saved");
-    setMessage("表格已储存到 Supabase / Onboarding form saved to Supabase.");
+    setMessage("表格已储存到 Supabase，并已通过 Resend 发送 HTML report / Saved to Supabase and sent the HTML report with Resend.");
   };
 
   return (
@@ -1119,10 +1264,6 @@ function CultureAgreementForm() {
         <div className="rule" />
         <p className="heroSub">入职与文化协议书 · 66 个双语字段 · 请完整填写所有栏目</p>
         <p className="formPath">{formPath}</p>
-        <div className="statusPill">
-          <Sparkles size={15} />
-          {supabase ? "Supabase configured" : "Supabase env needed"}
-        </div>
       </section>
 
       <nav className="sectionNav" aria-label="Onboarding sections">
@@ -1553,7 +1694,7 @@ function SubmissionDetail({ submission }: { submission: SubmissionRow | null }) 
     );
   }
 
-  const payload = submission.form_payload || {};
+  const payload = (submission.form_payload || {}) as Partial<FormData> & SubmissionPayload;
 
   const detailRows = [
     ["Chinese Name", payload.nameCN],
