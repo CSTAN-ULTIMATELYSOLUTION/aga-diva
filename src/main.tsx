@@ -55,10 +55,15 @@ type FormData = Record<string, FormValue> & {
   scalpCareSkills: string[];
   technicalLevel: string;
   contentCreation: string[];
+  contentCreationOther: string;
   softwareSkills: string[];
+  softwareSkillsOther: string;
   socialMediaSkills: string[];
+  socialMediaSkillsOther: string;
   businessSkills: string[];
+  businessSkillsOther: string;
   aiSystemSkills: string[];
+  aiSystemSkillsOther: string;
   cultureRead: boolean;
   cultureRespect: boolean;
   cultureGrowth: boolean;
@@ -218,10 +223,15 @@ const initialForm: FormData = {
   scalpCareSkills: [],
   technicalLevel: "",
   contentCreation: [],
+  contentCreationOther: "",
   softwareSkills: [],
+  softwareSkillsOther: "",
   socialMediaSkills: [],
+  socialMediaSkillsOther: "",
   businessSkills: [],
+  businessSkillsOther: "",
   aiSystemSkills: [],
+  aiSystemSkillsOther: "",
   cultureRead: false,
   cultureRespect: false,
   cultureGrowth: false,
@@ -255,6 +265,8 @@ const initialForm: FormData = {
   dateSigned: "",
   startDate: "",
 };
+
+const otherOption = "其他 Others";
 
 const sections: SectionConfig[] = [
   {
@@ -370,11 +382,11 @@ const sections: SectionConfig[] = [
     title: "额外能力",
     subtitle: "Additional Skills",
     fields: [
-      { id: "contentCreation", number: 30, label: "内容创作 Content Creation", type: "checkboxGroup", options: ["拍摄 Shooting", "Reels/Story 创作", "剪片 Video Editing", "文案 Copywriting"] },
-      { id: "softwareSkills", number: 31, label: "软件技能 Software Skills", type: "checkboxGroup", options: ["Canva", "剪映 CapCut", "Photoshop", "Illustrator", "Lightroom"] },
-      { id: "socialMediaSkills", number: 32, label: "社交媒体 Social Media", type: "checkboxGroup", options: ["IG", "TikTok", "小红书 Xiaohongshu", "FB Marketing"] },
-      { id: "businessSkills", number: 33, label: "商业能力 Business Skills", type: "checkboxGroup", options: ["销售 Sales", "客户沟通 Client Communication", "团队合作 Teamwork", "管理 Management", "活动策划 Event Planning", "品牌意识 Brand Awareness"] },
-      { id: "aiSystemSkills", number: 34, label: "AI/系统能力 AI / System Skills", type: "checkboxGroup", options: ["ChatGPT", "AI Design", "AI Content", "系统管理 System Management"] },
+      { id: "contentCreation", detailId: "contentCreationOther", number: 30, label: "内容创作 Content Creation", type: "checkboxGroup", options: ["拍摄 Shooting", "Reels/Story 创作", "剪片 Video Editing", "文案 Copywriting", otherOption], detailPlaceholder: "请填写其他内容创作能力" },
+      { id: "softwareSkills", detailId: "softwareSkillsOther", number: 31, label: "软件技能 Software Skills", type: "checkboxGroup", options: ["Canva", "剪映 CapCut", "Photoshop", "Illustrator", "Lightroom", otherOption], detailPlaceholder: "请填写其他软件技能" },
+      { id: "socialMediaSkills", detailId: "socialMediaSkillsOther", number: 32, label: "社交媒体 Social Media", type: "checkboxGroup", options: ["IG", "TikTok", "小红书 Xiaohongshu", "FB Marketing", otherOption], detailPlaceholder: "请填写其他社交媒体能力" },
+      { id: "businessSkills", detailId: "businessSkillsOther", number: 33, label: "商业能力 Business Skills", type: "checkboxGroup", options: ["销售 Sales", "客户沟通 Client Communication", "团队合作 Teamwork", "管理 Management", "活动策划 Event Planning", "品牌意识 Brand Awareness", otherOption], detailPlaceholder: "请填写其他商业能力" },
+      { id: "aiSystemSkills", detailId: "aiSystemSkillsOther", number: 34, label: "AI/系统能力 AI / System Skills", type: "checkboxGroup", options: ["ChatGPT", "AI Design", "AI Content", "系统管理 System Management", otherOption], detailPlaceholder: "请填写其他 AI 或系统能力" },
     ],
   },
   {
@@ -481,6 +493,9 @@ const formPath = "/form/culture-agreement";
 const summarizeArrays = (...values: string[][]) =>
   values.filter((value) => value.length).map((value) => value.join(", ")).join(" | ");
 
+const withOtherAnswer = (values: string[], other: string, label: string) =>
+  other.trim() ? [...values, `${label}: ${other.trim()}`] : values;
+
 const todayISO = () => new Date().toISOString().slice(0, 10);
 
 const normalizeICNumber = (value: string) => {
@@ -550,6 +565,16 @@ const validateFieldValue = (form: FormData, field: FieldConfig) => {
     if (typeof value === "boolean" && !value) return "此项必须确认 / This confirmation is required";
     if (Array.isArray(value) && value.length === 0) return "请选择一项 / Please select an option";
     if (typeof value === "string" && !stringValue) return "此项必填 / This field is required";
+  }
+
+  if (
+    field.type === "checkboxGroup" &&
+    field.detailId &&
+    Array.isArray(value) &&
+    value.includes(otherOption) &&
+    !String(form[field.detailId]).trim()
+  ) {
+    return "请选择其他时，请填写说明 / Please fill in the other option";
   }
 
   if (!stringValue) return "";
@@ -1009,11 +1034,11 @@ function CultureAgreementForm() {
       salon_experience: salonExperience || null,
       certifications: null,
       strengths: summarizeArrays(
-        normalizedForm.contentCreation,
-        normalizedForm.softwareSkills,
-        normalizedForm.socialMediaSkills,
-        normalizedForm.businessSkills,
-        normalizedForm.aiSystemSkills,
+        withOtherAnswer(normalizedForm.contentCreation, normalizedForm.contentCreationOther, "内容创作其他"),
+        withOtherAnswer(normalizedForm.softwareSkills, normalizedForm.softwareSkillsOther, "软件技能其他"),
+        withOtherAnswer(normalizedForm.socialMediaSkills, normalizedForm.socialMediaSkillsOther, "社交媒体其他"),
+        withOtherAnswer(normalizedForm.businessSkills, normalizedForm.businessSkillsOther, "商业能力其他"),
+        withOtherAnswer(normalizedForm.aiSystemSkills, normalizedForm.aiSystemSkillsOther, "AI/系统能力其他"),
       ) || null,
       growth_goals: normalizedForm.cultureNotes || normalizedForm.serviceNotes || null,
       uniform_size: null,
@@ -1031,7 +1056,7 @@ function CultureAgreementForm() {
         formName,
         signatureCaptured: Boolean(signature),
         submittedSectionCount: sections.length,
-        submittedFieldCount: 66,
+        submittedFieldCount: 71,
       },
     };
   };
@@ -1865,6 +1890,9 @@ function Field({
                 }
                 onChange={() => {
                   if (field.type === "checkboxGroup") {
+                    if (option === otherOption && field.detailId && selected.includes(option)) {
+                      onChange(field.detailId, "");
+                    }
                     onToggleArray(field.id, option);
                   } else {
                     onChange(field.id, option);
@@ -1877,6 +1905,17 @@ function Field({
             </label>
           ))}
         </div>
+        {field.type === "checkboxGroup" && field.detailId && selected.includes(otherOption) && (
+          <label className="field detailField">
+            <span>其他说明 Other Details</span>
+            <input
+              value={String(form[field.detailId])}
+              onChange={(event) => onChange(field.detailId!, event.target.value)}
+              onBlur={() => onFieldBlur(field)}
+              placeholder={field.detailPlaceholder || "请填写其他 / Please specify"}
+            />
+          </label>
+        )}
         {helper}
         {errorText}
       </fieldset>

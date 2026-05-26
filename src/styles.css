@@ -1694,6 +1694,10 @@ textarea:focus {
   margin-top: 12px;
 }
 
+.choiceBlock .detailField {
+  margin-top: 12px;
+}
+
 .signatureBox {
   overflow: hidden;
   border: 1px solid var(--border-gold);
