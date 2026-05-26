@@ -16,6 +16,7 @@ import {
   Users,
 } from "lucide-react";
 import "./styles.css";
+import { getCanvasPointerPosition } from "./signatureCanvas";
 
 type FormValue = string | boolean | string[];
 
@@ -1156,6 +1157,8 @@ function CultureAgreementForm() {
   const [touchedFields, setTouchedFields] = useState<Set<keyof FormData>>(new Set());
   const [submitAttempted, setSubmitAttempted] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const hasSignatureStrokeRef = useRef(false);
+  const lastSignaturePointRef = useRef<{ x: number; y: number } | null>(null);
 
   useEffect(() => {
     const onScroll = () => {
@@ -1218,10 +1221,7 @@ function CultureAgreementForm() {
     const canvas = canvasRef.current;
     if (!canvas) return { x: 0, y: 0 };
     const rect = canvas.getBoundingClientRect();
-    return {
-      x: event.clientX - rect.left,
-      y: event.clientY - rect.top,
-    };
+    return getCanvasPointerPosition(event, rect, canvas);
   };
 
   const beginSignature = (event: React.PointerEvent<HTMLCanvasElement>) => {
@@ -1230,6 +1230,8 @@ function CultureAgreementForm() {
     if (!canvas || !context) return;
     canvas.setPointerCapture(event.pointerId);
     const { x, y } = pointerPosition(event);
+    hasSignatureStrokeRef.current = false;
+    lastSignaturePointRef.current = { x, y };
     context.beginPath();
     context.moveTo(x, y);
     context.lineWidth = 2.4;
@@ -1243,15 +1245,25 @@ function CultureAgreementForm() {
     const context = canvasRef.current?.getContext("2d");
     if (!context) return;
     const { x, y } = pointerPosition(event);
+    const lastPoint = lastSignaturePointRef.current;
+    if (lastPoint && lastPoint.x === x && lastPoint.y === y) return;
     context.lineTo(x, y);
     context.stroke();
+    hasSignatureStrokeRef.current = true;
+    lastSignaturePointRef.current = { x, y };
   };
 
-  const endSignature = () => {
+  const endSignature = (event: React.PointerEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     setIsDrawing(false);
-    setSignature(canvas.toDataURL("image/png"));
+    lastSignaturePointRef.current = null;
+    if (canvas.hasPointerCapture(event.pointerId)) {
+      canvas.releasePointerCapture(event.pointerId);
+    }
+    if (hasSignatureStrokeRef.current) {
+      setSignature(canvas.toDataURL("image/png"));
+    }
   };
 
   const clearSignature = () => {
@@ -1259,6 +1271,8 @@ function CultureAgreementForm() {
     const context = canvas?.getContext("2d");
     if (!canvas || !context) return;
     context.clearRect(0, 0, canvas.width, canvas.height);
+    hasSignatureStrokeRef.current = false;
+    lastSignaturePointRef.current = null;
     setSignature("");
   };
 
