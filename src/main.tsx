@@ -682,7 +682,115 @@ const buildEmailReportText = (form: FormData, salonExperience: string, strengths
     `Submitted for: ${form.finalName || form.nameEN || form.nameCN}`,
     "",
     ...reportRows(form, salonExperience, strengths).map(([label, value]) => `${label}: ${reportValue(value)}`),
+    "",
+    "Full Form Report",
+    ...buildFullReportText(form),
   ].join("\n");
+
+const buildFullReportText = (form: FormData) =>
+  sections.flatMap((section) => [
+    "",
+    `${section.number}. ${section.title} / ${section.subtitle}`,
+    ...section.fields.flatMap((field) => buildFieldReportText(form, field)),
+  ]);
+
+const buildFieldReportText = (form: FormData, field: FieldConfig) => {
+  if (field.type === "sectionBreak") return [`-- ${field.label} --`];
+  if (!field.id) return [];
+
+  const label = `${field.number ? `${field.number}. ` : ""}${field.label}`;
+  const value = form[field.id];
+  const detailValue = field.detailId ? form[field.detailId] : "";
+
+  if (field.type === "checkboxGroup") {
+    const selectedValues = Array.isArray(value) ? value : [];
+    return [
+      label,
+      ...(field.options || []).map((option) => `  ${selectedValues.includes(option) ? "[x]" : "[ ]"} ${option}`),
+      ...(field.detailId ? [`  Other detail: ${reportValue(detailValue)}`] : []),
+    ];
+  }
+
+  if (field.type === "checkbox") {
+    return [`${label}: ${value ? "Checked" : "Not checked"}`];
+  }
+
+  if (field.type === "yesNoDetail") {
+    return [
+      `${label}: ${reportValue(value)}`,
+      ...(field.detailId ? [`  Detail: ${reportValue(detailValue)}`] : []),
+    ];
+  }
+
+  return [`${label}: ${reportValue(value)}`];
+};
+
+const buildFullReportHtml = (form: FormData) =>
+  sections
+    .map(
+      (section) => `
+        <section class="full-section">
+          <h2><span>${escapeHtml(section.number)}</span>${escapeHtml(section.title)}</h2>
+          <p>${escapeHtml(section.subtitle)}</p>
+          <div class="full-fields">
+            ${section.fields.map((field) => buildFieldReportHtml(form, field)).join("")}
+          </div>
+        </section>`,
+    )
+    .join("");
+
+const buildFieldReportHtml = (form: FormData, field: FieldConfig) => {
+  if (field.type === "sectionBreak") {
+    return `<div class="full-break">${escapeHtml(field.label)}</div>`;
+  }
+
+  if (!field.id) return "";
+
+  const label = `${field.number ? `${field.number}. ` : ""}${field.label}`;
+  const value = form[field.id];
+  const detailValue = field.detailId ? form[field.detailId] : "";
+
+  if (field.type === "checkboxGroup") {
+    const selectedValues = Array.isArray(value) ? value : [];
+    const options = (field.options || [])
+      .map((option) => {
+        const selected = selectedValues.includes(option);
+        return `<span class="${selected ? "checked" : "unchecked"}">${selected ? "Checked" : "Not checked"} · ${escapeHtml(option)}</span>`;
+      })
+      .join("");
+
+    return `
+      <div class="full-field wide">
+        <h3>${escapeHtml(label)}</h3>
+        <div class="options">${options}</div>
+        ${field.detailId ? `<p>Other detail: ${escapeHtml(reportValue(detailValue))}</p>` : ""}
+      </div>`;
+  }
+
+  if (field.type === "checkbox") {
+    const checked = Boolean(value);
+    return `
+      <div class="full-field ${checked ? "checked" : "unchecked"}">
+        <h3>${escapeHtml(label)}</h3>
+        <strong>${checked ? "Checked" : "Not checked"}</strong>
+      </div>`;
+  }
+
+  if (field.type === "yesNoDetail") {
+    return `
+      <div class="full-field wide">
+        <h3>${escapeHtml(label)}</h3>
+        <strong>${escapeHtml(reportValue(value))}</strong>
+        ${field.detailId ? `<p>Detail: ${escapeHtml(reportValue(detailValue))}</p>` : ""}
+      </div>`;
+  }
+
+  return `
+    <div class="full-field ${field.type === "textarea" ? "wide" : ""}">
+      <h3>${escapeHtml(label)}</h3>
+      <strong>${escapeHtml(reportValue(value))}</strong>
+    </div>`;
+};
 
 const buildEmailReportHtml = (form: FormData, salonExperience: string, strengths: string, signature: string) => {
   const rows = reportRows(form, salonExperience, strengths)
@@ -710,8 +818,27 @@ const buildEmailReportHtml = (form: FormData, salonExperience: string, strengths
       th, td { padding: 14px 18px; border-bottom: 1px solid #2a2a2a; text-align: left; vertical-align: top; }
       th { width: 32%; color: #c9a96e; font-size: 12px; letter-spacing: 1px; text-transform: uppercase; }
       td { color: #f0ede5; }
+      .full { padding: 26px 32px; border-top: 1px solid #2e2010; }
+      .full h1 { margin: 0 0 16px; font-size: 22px; }
+      .full-section { margin: 0 0 18px; border: 1px solid #2a2a2a; border-radius: 12px; overflow: hidden; }
+      .full-section h2 { display: flex; align-items: center; gap: 10px; margin: 0; padding: 14px; background: #15120c; color: #ead89e; font-size: 16px; }
+      .full-section h2 span { display: inline-block; min-width: 24px; color: #c9a96e; }
+      .full-section > p { margin: 0; padding: 0 14px 12px; background: #15120c; color: #999080; }
+      .full-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 14px; }
+      .full-field, .full-break { border: 1px solid #2a2a2a; border-radius: 10px; padding: 12px; background: #151515; }
+      .full-field.wide, .full-break { grid-column: 1 / -1; }
+      .full-break { color: #c9a96e; letter-spacing: 1px; text-transform: uppercase; }
+      .full-field h3 { margin: 0 0 8px; color: #999080; font-size: 11px; letter-spacing: 1px; text-transform: uppercase; }
+      .full-field strong { color: #f0ede5; font-weight: 400; }
+      .full-field p { margin: 8px 0 0; color: #999080; }
+      .options { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+      .options span { border: 1px solid #2a2a2a; border-radius: 8px; padding: 8px; color: #999080; }
+      .options span.checked, .full-field.checked strong { border-color: #7d612e; color: #ead89e; }
       .signature { padding: 20px 32px 32px; }
       .signature img { max-width: 100%; border: 1px solid #2e2010; background: #0a0700; }
+      @media (max-width: 680px) {
+        .full-fields, .options { grid-template-columns: 1fr; }
+      }
     </style>
   </head>
   <body>
@@ -721,6 +848,10 @@ const buildEmailReportHtml = (form: FormData, salonExperience: string, strengths
         <p>${escapeHtml(form.finalName || form.nameEN || form.nameCN)} · ${escapeHtml(form.email)} · ${escapeHtml(form.phone)}</p>
       </header>
       <table>${rows}</table>
+      <section class="full">
+        <h1>Full Form Report</h1>
+        ${buildFullReportHtml(form)}
+      </section>
       ${signature ? `<section class="signature"><p>Signature</p><img src="${escapeHtml(signature)}" alt="Signature" /></section>` : ""}
     </article>
   </body>
@@ -1752,6 +1883,8 @@ function SubmissionDetail({ submission }: { submission: SubmissionRow | null }) 
         <TagList values={payload.aiSystemSkills} />
       </div>
 
+      <FullSubmissionReport payload={payload} />
+
       {submission.signature_data_url && (
         <div className="signaturePreview">
           <h3>Signature</h3>
@@ -1759,6 +1892,117 @@ function SubmissionDetail({ submission }: { submission: SubmissionRow | null }) 
         </div>
       )}
     </section>
+  );
+}
+
+function FullSubmissionReport({ payload }: { payload: Partial<FormData> & SubmissionPayload }) {
+  return (
+    <div className="fullReport">
+      <div className="fullReportHead">
+        <h3>Full Form Report</h3>
+        <small>All checked and unchecked answers from the saved form payload</small>
+      </div>
+
+      {sections.map((section) => (
+        <section className="reportSection" key={section.id}>
+          <div className="reportSectionHead">
+            <span>{section.number}</span>
+            <div>
+              <h4>{section.title}</h4>
+              <small>{section.subtitle}</small>
+            </div>
+          </div>
+
+          <div className="reportFields">
+            {section.fields.map((field, index) => (
+              <AdminFieldReport
+                field={field}
+                key={`${section.id}-${field.id || field.label}-${index}`}
+                payload={payload}
+              />
+            ))}
+          </div>
+        </section>
+      ))}
+    </div>
+  );
+}
+
+function AdminFieldReport({
+  field,
+  payload,
+}: {
+  field: FieldConfig;
+  payload: Partial<FormData> & SubmissionPayload;
+}) {
+  if (field.type === "sectionBreak") {
+    return (
+      <div className="reportBreak">
+        <span>{field.label}</span>
+      </div>
+    );
+  }
+
+  if (!field.id) return null;
+
+  const value = payload[field.id];
+  const detailValue = field.detailId ? payload[field.detailId] : "";
+
+  if (field.type === "checkboxGroup") {
+    const selectedValues = Array.isArray(value) ? value : [];
+
+    return (
+      <div className="reportField wide">
+        <small>{field.number ? `${field.number}. ` : ""}{field.label}</small>
+        <div className="checkMatrix">
+          {(field.options || []).map((option) => {
+            const selected = selectedValues.includes(option);
+            return (
+              <span className={selected ? "checked" : "unchecked"} key={option}>
+                {selected ? "✓" : "×"} {option}
+              </span>
+            );
+          })}
+        </div>
+        {field.detailId && (
+          <p className="reportOther">
+            Other detail: {formatAdminValue(detailValue)}
+          </p>
+        )}
+      </div>
+    );
+  }
+
+  if (field.type === "checkbox") {
+    const checked = Boolean(value);
+
+    return (
+      <div className={`reportField checkStatus ${checked ? "checked" : "unchecked"}`}>
+        <small>{field.number ? `${field.number}. ` : ""}{field.label}</small>
+        <strong>{checked ? "✓ Checked" : "× Not checked"}</strong>
+      </div>
+    );
+  }
+
+  if (field.type === "yesNoDetail") {
+    return (
+      <div className="reportField wide">
+        <small>{field.number ? `${field.number}. ` : ""}{field.label}</small>
+        <strong>{formatAdminValue(value)}</strong>
+        {field.detailId && (
+          <p className="reportOther">
+            Detail: {formatAdminValue(detailValue)}
+          </p>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <div className={field.type === "textarea" ? "reportField wide" : "reportField"}>
+      <small>{field.number ? `${field.number}. ` : ""}{field.label}</small>
+      <strong>{formatAdminValue(value)}</strong>
+    </div>
   );
 }
 
